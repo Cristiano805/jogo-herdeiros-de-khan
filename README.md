@@ -26,6 +26,4 @@ O projeto foi modelado para aplicar os conceitos fundamentais de Orientação a 
 ## 👨‍💻 Autor
 **Cristiano Ferreira De Mattos**
 
-**Felipe**
-
-**Matheus da Silva Oliveira**
+**Felipe Eduardo Nunes Silva**

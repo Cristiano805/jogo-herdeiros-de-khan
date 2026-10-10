@@ -39,6 +39,18 @@ class Jogador {
         }
     }
 
+    public boolean removerTributo(TipoTributo tipo, int quantidade) {
+        if (tipo == null || quantidade <= 0) {
+            return false;
+        }
+        int atual = this.tributos.getOrDefault(tipo, 0);
+        if (atual < quantidade) {
+            return false;
+        }
+        this.tributos.put(tipo, atual - quantidade);
+        return true;
+    }
+
     public int getQuantidadeTributo(TipoTributo tipo) {
         if (tipo == null) return 0;
         return this.tributos.getOrDefault(tipo, 0);

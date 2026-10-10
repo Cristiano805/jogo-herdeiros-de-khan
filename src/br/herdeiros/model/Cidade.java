@@ -1,7 +1,9 @@
 package br.herdeiros.model;
 
-public class Cidade {
-	private NomeCidade nome;
+import java.util.Objects;
+
+class Cidade {
+    private NomeCidade nome;
     private Regiao regiao;
     private int quantidadeTesouros;
     private boolean conquistada;
@@ -35,6 +37,10 @@ public class Cidade {
         return nome.getNomeFormatado();
     }
 
+    public NomeCidade getNomeCidade() {
+        return nome;
+    }
+
     public Regiao getRegiao() {
         return regiao;
     }
@@ -47,4 +53,17 @@ public class Cidade {
         return conquistada;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Cidade cidade = (Cidade) o;
+        return nome == cidade.nome;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(nome);
+    }
 }
+

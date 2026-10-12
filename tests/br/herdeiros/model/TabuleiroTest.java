@@ -43,13 +43,18 @@ public class TabuleiroTest {
      */
     @Test(timeout = TIMEOUT_PADRAO)
     public void testSubstituirCidadeConquistadaNoTabuleiroAtualizaMapa() {
-        Cidade cidadeParaRemover = tabuleiroTeste.getCidadesDisponiveis().values().iterator().next();
-        NomeCidade nomeRemovida = cidadeParaRemover.getNomeCidade();
-
+        Cidade cidadeAntiga = new Cidade(NomeCidade.MOSCOU, Regiao.RUSSIA);
         Cidade novaCidade = new Cidade(NomeCidade.PEQUIM, Regiao.CHINA);
-        tabuleiroTeste.substituirCidadeConquistada(cidadeParaRemover, novaCidade);
 
-        assertNull("A cidade antiga não deve mais estar no mapa", tabuleiroTeste.getCidade(nomeRemovida));
-        assertEquals("A nova cidade deve estar acessível pela chave no mapa", novaCidade, tabuleiroTeste.getCidade(NomeCidade.PEQUIM));
+        Tabuleiro tabuleiro = new Tabuleiro(java.util.Arrays.asList(
+            cidadeAntiga,
+            new Cidade(NomeCidade.KAZAN, Regiao.RUSSIA),
+            new Cidade(NomeCidade.NOVGOROD, Regiao.RUSSIA)
+        ));
+
+        tabuleiro.substituirCidadeConquistada(cidadeAntiga, novaCidade);
+
+        assertNull("A cidade antiga não deve mais estar no mapa", tabuleiro.getCidade(NomeCidade.MOSCOU));
+        assertEquals("A nova cidade deve estar acessível pela chave no mapa", novaCidade, tabuleiro.getCidade(NomeCidade.PEQUIM));
     }
-}
+}

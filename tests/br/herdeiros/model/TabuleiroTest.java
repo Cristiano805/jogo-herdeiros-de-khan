@@ -1,5 +1,55 @@
 package br.herdeiros.model;
 
-public class TabuleiroTest {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
+import java.util.List;
+import java.util.Map;
+
+import org.junit.Before;
+import org.junit.Test;
+
+
+public class TabuleiroTest {
+    private static final int TIMEOUT_PADRAO = 1000;
+    private Tabuleiro tabuleiroTeste;
+
+    @Before
+    public void setUp() {
+        BaralhoDeCidades baralho = new BaralhoDeCidades();
+        List<Cidade> cidadesIniciais = baralho.sacarCidadesIniciais();
+        tabuleiroTeste = new Tabuleiro(cidadesIniciais);
+    }
+
+    /**
+     * Objetivo: Testar se o Tabuleiro inicializa as cidades disponíveis utilizando a estrutura de Mapa (HashMap).
+     * Cenário: Tabuleiro instanciado com 3 cidades sorteadas.
+     * Ação: Consulta ao mapa de cidades disponíveis.
+     * Resultado Esperado: Mapa não nulo com exatamente 3 cidades indexadas por NomeCidade.
+     */
+    @Test(timeout = TIMEOUT_PADRAO)
+    public void testTabuleiroInicializaComCidadesDisponiveisNoMapa() {
+        Map<NomeCidade, Cidade> disponiveis = tabuleiroTeste.getCidadesDisponiveis();
+        assertNotNull("O mapa de cidades disponíveis no tabuleiro não deve ser nulo", disponiveis);
+        assertEquals("O tabuleiro deve conter 3 cidades disponíveis inicialmente", 3, disponiveis.size());
+    }
+
+    /**
+     * Objetivo: Testar a substituição de cidade conquistada no mapa de cidades do Tabuleiro via HashMap.
+     * Cenário: Tabuleiro com 3 cidades ativas.
+     * Ação: Remoção da cidade antiga e inclusão de nova cidade sacada.
+     * Resultado Esperado: Antiga cidade inacessível via chave e nova cidade indexada com sucesso.
+     */
+    @Test(timeout = TIMEOUT_PADRAO)
+    public void testSubstituirCidadeConquistadaNoTabuleiroAtualizaMapa() {
+        Cidade cidadeParaRemover = tabuleiroTeste.getCidadesDisponiveis().values().iterator().next();
+        NomeCidade nomeRemovida = cidadeParaRemover.getNomeCidade();
+
+        Cidade novaCidade = new Cidade(NomeCidade.PEQUIM, Regiao.CHINA);
+        tabuleiroTeste.substituirCidadeConquistada(cidadeParaRemover, novaCidade);
+
+        assertNull("A cidade antiga não deve mais estar no mapa", tabuleiroTeste.getCidade(nomeRemovida));
+        assertEquals("A nova cidade deve estar acessível pela chave no mapa", novaCidade, tabuleiroTeste.getCidade(NomeCidade.PEQUIM));
+    }
 }

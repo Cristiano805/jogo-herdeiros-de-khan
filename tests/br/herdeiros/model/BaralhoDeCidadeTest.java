@@ -8,11 +8,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-/**
- * Testes unitários da classe BaralhoDeCidades.
- * Implementada com JUnit 4 e documentada conforme as diretrizes do Capítulo 18 (INF1636).
- */
-public class BaralhoDeCidadesTest {
+public class BaralhoDeCidadeTest{
     private static final int TIMEOUT_PADRAO = 1000;
     private BaralhoDeCidades baralhoTeste;
 

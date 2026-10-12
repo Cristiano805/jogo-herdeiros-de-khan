@@ -9,8 +9,8 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
     CidadeTest.class,
-    Jogadortest.class,
-    BaralhoDeCidadesTest.class,
+    JogadorTest.class,
+    BaralhoDeCidadeTest.class,
     TabuleiroTest.class,
     PeaoTest.class,
     PartidaTest.class

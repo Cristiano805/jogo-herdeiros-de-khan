@@ -7,7 +7,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 
- class PartidaTest {
+public class PartidaTest {
     private static final int TIMEOUT_PADRAO = 1000;
     private Partida partida;
 

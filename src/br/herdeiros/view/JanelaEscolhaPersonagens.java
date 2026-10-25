@@ -70,7 +70,24 @@ public class JanelaEscolhaPersonagens extends JFrame {
         setResizable(false);
         setLocationRelativeTo(null);
 
-        JPanel painelPrincipal = new JPanel(new BorderLayout(15, 15));
+        JPanel painelPrincipal = new JPanel(new BorderLayout(15, 15)) {
+            private java.awt.Image imgFundo;
+            {
+                try {
+                    java.io.File f = new java.io.File("img/plano_de_fundo.jpg");
+                    if (f.exists()) {
+                        imgFundo = javax.imageio.ImageIO.read(f);
+                    }
+                } catch (Exception e) {}
+            }
+            @Override
+            protected void paintComponent(java.awt.Graphics g) {
+                super.paintComponent(g);
+                if (imgFundo != null) {
+                    g.drawImage(imgFundo, 0, 0, getWidth(), getHeight(), this);
+                }
+            }
+        };
         painelPrincipal.setBackground(new Color(245, 245, 250));
         painelPrincipal.setBorder(new EmptyBorder(20, 30, 20, 30));
 
@@ -80,13 +97,14 @@ public class JanelaEscolhaPersonagens extends JFrame {
 
         JLabel lblTitulo = new JLabel("Configuração dos Herdeiros", JLabel.CENTER);
         lblTitulo.setFont(new Font("Arial", Font.BOLD, 22));
-        lblTitulo.setForeground(new Color(40, 40, 50));
+        lblTitulo.setForeground(new Color(255, 255, 255));
         painelTopo.add(lblTitulo, BorderLayout.NORTH);
 
         JPanel painelSeletorQtd = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 5));
         painelSeletorQtd.setOpaque(false);
         JLabel lblQtd = new JLabel("Quantidade de Jogadores:");
         lblQtd.setFont(new Font("Arial", Font.BOLD, 14));
+        lblQtd.setForeground(Color.WHITE);
 
         Integer[] opcoesQtd = {2, 3, 4, 5};
         comboQtdJogadores = new JComboBox<Integer>(opcoesQtd);
@@ -162,8 +180,9 @@ public class JanelaEscolhaPersonagens extends JFrame {
         painelCamposJogadores.removeAll();
         linhasJogadores.clear();
 
-        String[] nomesPadrao = {"Batu Khan", "Berke Khan", "Hulagu Khan", "Kublai Khan", "Jochi Khan"};
-        Cor[] coresPadrao = {Cor.VERMELHO, Cor.AZUL, Cor.VERDE, Cor.AMARELO, Cor.PRETO};
+        // Nomes oficiais dos herdeiros que possuem cartela no jogo
+        String[] nomesPadrao = {"Altani", "Chagatai", "Jochi", "Ogedei", "Tolui"};
+        Cor[] coresPadrao = {Cor.VERMELHO, Cor.AZUL, Cor.VERDE, Cor.AMARELO, Cor.LARANJA};
         int[] descendentesPadrao = {4, 2, 5, 3, 1};
 
         Cor[] todasCoresDisponiveis = {Cor.VERMELHO, Cor.AZUL, Cor.VERDE, Cor.AMARELO, Cor.LARANJA, Cor.PRETO};

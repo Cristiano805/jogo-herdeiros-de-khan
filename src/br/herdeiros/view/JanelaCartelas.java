@@ -6,7 +6,6 @@ import br.herdeiros.model.Partida;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -16,38 +15,33 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import javax.imageio.ImageIO;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
 /**
- * Janela própria para exibição dos tabuleiros individuais dos herdeiros (as cartelas de jogador).
- * Permite alternar entre os jogadores da partida ou abrir a cartela do jogador da vez.
+ * Janela para exibição estrita do tabuleiro individual (cartela) do jogador da vez.
+ * Cada jogador só tem acesso à visualização da sua própria cartela no seu turno.
  * Desenhada com Graphics2D.drawImage() via Java2D.
  */
 public class JanelaCartelas extends JFrame {
 
     private Partida partida;
     private Map<Cor, Image> cacheCartelas;
-    private JComboBox<String> comboSeletorJogador;
+    private JLabel lblJogador;
     private PainelExibicaoCartela painelExibicao;
-    private List<Cor> listaCores;
 
     public JanelaCartelas(Partida partida) {
         this.partida = partida;
         this.cacheCartelas = new HashMap<Cor, Image>();
-        this.listaCores = new ArrayList<Cor>();
 
-        setTitle("Herdeiros de Khan - Tabuleiros dos Herdeiros (Cartelas)");
-        setSize(1050, 750);
+        setTitle("Herdeiros de Khan - Meu Tabuleiro (Cartela)");
+        setSize(950, 720);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 
@@ -57,43 +51,28 @@ public class JanelaCartelas extends JFrame {
         painelPrincipal.setBackground(new Color(240, 240, 245));
         painelPrincipal.setBorder(new EmptyBorder(10, 15, 10, 15));
 
-        // Barra Superior: Seletor de jogador e botão fechar
-        JPanel painelTopo = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 5));
+        // Barra Superior: Nome do jogador da vez e botão fechar
+        JPanel painelTopo = new JPanel(new BorderLayout());
         painelTopo.setOpaque(false);
 
-        JLabel lblSelecione = new JLabel("Visualizar Cartela de:");
-        lblSelecione.setFont(new Font("Arial", Font.BOLD, 13));
+        lblJogador = new JLabel("Cartela do Jogador da Vez", JLabel.LEFT);
+        lblJogador.setFont(new Font("Arial", Font.BOLD, 15));
+        lblJogador.setForeground(new Color(40, 40, 50));
 
-        comboSeletorJogador = new JComboBox<String>();
-        comboSeletorJogador.setPreferredSize(new Dimension(250, 32));
-
-        preencherCombo();
-
-        comboSeletorJogador.addActionListener(new ActionListener() {
+        JButton btnFechar = new JButton("Fechar");
+        btnFechar.setFont(new Font("Arial", Font.BOLD, 12));
+        btnFechar.setBackground(new Color(127, 140, 141));
+        btnFechar.setForeground(Color.WHITE);
+        btnFechar.setFocusPainted(false);
+        btnFechar.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                int idx = comboSeletorJogador.getSelectedIndex();
-                if (idx >= 0 && idx < listaCores.size()) {
-                    painelExibicao.setCorAtual(listaCores.get(idx));
-                }
+                JanelaCartelas.this.dispose();
             }
         });
 
-        JButton btnVerJogadorDaVez = new JButton("Ver Jogador da Vez");
-        btnVerJogadorDaVez.setFont(new Font("Arial", Font.BOLD, 12));
-        btnVerJogadorDaVez.setBackground(new Color(41, 128, 185));
-        btnVerJogadorDaVez.setForeground(Color.WHITE);
-        btnVerJogadorDaVez.setFocusPainted(false);
-        btnVerJogadorDaVez.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                sincronizarComJogadorDaVez();
-            }
-        });
-
-        painelTopo.add(lblSelecione);
-        painelTopo.add(comboSeletorJogador);
-        painelTopo.add(btnVerJogadorDaVez);
+        painelTopo.add(lblJogador, BorderLayout.WEST);
+        painelTopo.add(btnFechar, BorderLayout.EAST);
         painelPrincipal.add(painelTopo, BorderLayout.NORTH);
 
         // Painel Central com renderização Java2D da cartela
@@ -106,7 +85,6 @@ public class JanelaCartelas extends JFrame {
     }
 
     private void carregarCartelas() {
-        // Mapeia as 5 cartelas disponíveis na pasta img/cartelas/
         carregarImagem(Cor.VERMELHO, "img/cartelas/cartela_altani.jpg");
         carregarImagem(Cor.AZUL, "img/cartelas/cartela_chagatai.jpg");
         carregarImagem(Cor.VERDE, "img/cartelas/cartela_jochi.jpg");
@@ -126,27 +104,12 @@ public class JanelaCartelas extends JFrame {
         }
     }
 
-    private void preencherCombo() {
-        comboSeletorJogador.removeAllItems();
-        listaCores.clear();
-
-        if (partida == null) return;
-
-        for (Cor cor : partida.getCoresJogadores()) {
-            listaCores.add(cor);
-            String nome = partida.getNomeJogador(cor);
-            comboSeletorJogador.addItem(nome + " (" + cor + ")");
-        }
-    }
-
     public void sincronizarComJogadorDaVez() {
         if (partida == null) return;
         Cor corVez = partida.getCorJogadorAtual();
-        int idx = listaCores.indexOf(corVez);
-        if (idx >= 0) {
-            comboSeletorJogador.setSelectedIndex(idx);
-            painelExibicao.setCorAtual(corVez);
-        }
+        String nome = partida.getNomeJogadorAtual();
+        lblJogador.setText("Tabuleiro de: " + nome + " (" + corVez + ")");
+        painelExibicao.setCorAtual(corVez);
     }
 
     private class PainelExibicaoCartela extends JPanel {
@@ -172,7 +135,6 @@ public class JanelaCartelas extends JFrame {
 
             Image img = cacheCartelas.get(corAtual);
             if (img != null) {
-                // Desenha a imagem da cartela ajustada e centralizada no painel via Java2D
                 int painelW = getWidth();
                 int painelH = getHeight();
                 int imgW = img.getWidth(this);

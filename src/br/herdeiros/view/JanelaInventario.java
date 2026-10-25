@@ -9,13 +9,9 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.GridLayout;
-import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Map;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -25,8 +21,8 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 
 /**
- * Janela separada para visualização do inventário de tributos e votos de cada jogador.
- * Pode ser aberta e fechada por meio de botão na tela principal.
+ * Janela para visualização estrita do inventário de tributos e votos do jogador da vez.
+ * Cada jogador só pode consultar os seus próprios recursos.
  */
 public class JanelaInventario extends JFrame {
 
@@ -36,8 +32,8 @@ public class JanelaInventario extends JFrame {
     public JanelaInventario(Partida partida) {
         this.partida = partida;
 
-        setTitle("Herdeiros de Khan - Inventário dos Jogadores");
-        setSize(800, 520);
+        setTitle("Herdeiros de Khan - Meu Inventário");
+        setSize(650, 360);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(false);
@@ -46,13 +42,13 @@ public class JanelaInventario extends JFrame {
         painelPrincipal.setBackground(new Color(245, 245, 250));
         painelPrincipal.setBorder(new EmptyBorder(15, 20, 15, 20));
 
-        JLabel lblTitulo = new JLabel("Inventário de Recursos & Tributos", JLabel.CENTER);
-        lblTitulo.setFont(new Font("Arial", Font.BOLD, 20));
+        JLabel lblTitulo = new JLabel("Meu Inventário de Recursos", JLabel.CENTER);
+        lblTitulo.setFont(new Font("Arial", Font.BOLD, 18));
         lblTitulo.setForeground(new Color(40, 40, 50));
         painelPrincipal.add(lblTitulo, BorderLayout.NORTH);
 
         painelCartoes = new JPanel();
-        painelCartoes.setLayout(new GridLayout(0, 1, 10, 10));
+        painelCartoes.setLayout(new BorderLayout());
         painelCartoes.setOpaque(false);
         painelPrincipal.add(painelCartoes, BorderLayout.CENTER);
 
@@ -83,45 +79,49 @@ public class JanelaInventario extends JFrame {
 
         painelCartoes.removeAll();
 
-        for (Cor cor : partida.getCoresJogadores()) {
-            String nome = partida.getNomeJogador(cor);
-            int votos = partida.getVotosJogador(cor);
-            String loc = partida.getLocalizacaoJogador(cor);
-            int espadas = partida.getTributosJogador(cor, TipoTributo.ESPADA);
-            int yurts = partida.getTributosJogador(cor, TipoTributo.YURT);
-            int moedas = partida.getTributosJogador(cor, TipoTributo.MOEDA);
+        // Obtém exclusivamente os dados do jogador da vez
+        Cor cor = partida.getCorJogadorAtual();
+        if (cor == null) return;
 
-            JPanel card = new JPanel(new GridLayout(1, 4, 15, 5));
-            card.setBackground(Color.WHITE);
-            card.setBorder(BorderFactory.createTitledBorder(
-                    BorderFactory.createLineBorder(obterCorAwt(cor), 2),
-                    nome + " (" + cor + ")",
-                    TitledBorder.LEFT,
-                    TitledBorder.TOP,
-                    new Font("Arial", Font.BOLD, 13),
-                    obterCorAwt(cor)
-            ));
+        String nome = partida.getNomeJogadorAtual();
+        int votos = partida.getVotosJogadorAtual();
+        String loc = partida.getLocalizacaoJogadorAtual();
+        int espadas = partida.getTributosJogador(cor, TipoTributo.ESPADA);
+        int yurts = partida.getTributosJogador(cor, TipoTributo.YURT);
+        int moedas = partida.getTributosJogador(cor, TipoTributo.MOEDA);
 
-            JLabel lblPos = new JLabel("Posição: " + loc);
-            lblPos.setFont(new Font("Arial", Font.PLAIN, 12));
+        JPanel card = new JPanel(new GridLayout(4, 1, 10, 10));
+        card.setBackground(Color.WHITE);
+        card.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createTitledBorder(
+                        BorderFactory.createLineBorder(obterCorAwt(cor), 2),
+                        nome + " (" + cor + ")",
+                        TitledBorder.LEFT,
+                        TitledBorder.TOP,
+                        new Font("Arial", Font.BOLD, 14),
+                        obterCorAwt(cor)
+                ),
+                new EmptyBorder(10, 15, 10, 15)
+        ));
 
-            JLabel lblVotos = new JLabel("Votos Kurultai: " + votos);
-            lblVotos.setFont(new Font("Arial", Font.BOLD, 12));
+        JLabel lblPos = new JLabel("📍 Posição no Mapa: " + loc);
+        lblPos.setFont(new Font("Arial", Font.PLAIN, 14));
 
-            JLabel lblTrib1 = new JLabel("⚔ Espadas: " + espadas + " | ⛺ Yurts: " + yurts);
-            lblTrib1.setFont(new Font("Arial", Font.PLAIN, 12));
+        JLabel lblVotos = new JLabel("🗳 Votos no Conselho Kurultai: " + votos);
+        lblVotos.setFont(new Font("Arial", Font.BOLD, 14));
 
-            JLabel lblTrib2 = new JLabel("💰 Moedas: " + moedas);
-            lblTrib2.setFont(new Font("Arial", Font.PLAIN, 12));
+        JLabel lblTrib1 = new JLabel("⚔ Espadas para Saques: " + espadas + "    |    ⛺ Yurts Disponíveis: " + yurts);
+        lblTrib1.setFont(new Font("Arial", Font.PLAIN, 14));
 
-            card.add(lblPos);
-            card.add(lblVotos);
-            card.add(lblTrib1);
-            card.add(lblTrib2);
+        JLabel lblTrib2 = new JLabel("💰 Moedas de Tributo: " + moedas);
+        lblTrib2.setFont(new Font("Arial", Font.PLAIN, 14));
 
-            painelCartoes.add(card);
-        }
+        card.add(lblPos);
+        card.add(lblVotos);
+        card.add(lblTrib1);
+        card.add(lblTrib2);
 
+        painelCartoes.add(card, BorderLayout.CENTER);
         painelCartoes.revalidate();
         painelCartoes.repaint();
     }

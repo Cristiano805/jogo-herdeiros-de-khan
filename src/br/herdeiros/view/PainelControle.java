@@ -62,7 +62,7 @@ public class PainelControle extends JPanel {
         add(btnEncerrarTurno);
 
         // 2.1 Botões auxiliares para Cartelas e Inventário
-        btnVerCartelas = new JButton("Ver Tabuleiros (Cartelas)");
+        btnVerCartelas = new JButton("Ver Meu Tabuleiro (Cartela)");
         btnVerCartelas.setPreferredSize(new Dimension(260, 36));
         btnVerCartelas.setFont(new Font("Arial", Font.BOLD, 12));
         btnVerCartelas.setBackground(new Color(52, 73, 94));
@@ -70,7 +70,7 @@ public class PainelControle extends JPanel {
         btnVerCartelas.setFocusPainted(false);
         add(btnVerCartelas);
 
-        btnVerInventario = new JButton("Ver Inventário de Recursos");
+        btnVerInventario = new JButton("Ver Meu Inventário");
         btnVerInventario.setPreferredSize(new Dimension(260, 36));
         btnVerInventario.setFont(new Font("Arial", Font.BOLD, 12));
         btnVerInventario.setBackground(new Color(39, 174, 96));

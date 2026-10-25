@@ -57,11 +57,12 @@ public class JanelaMenuInicial extends JFrame {
 
 
 
-        // Botões Centrais de Opção
+        // Botões Centrais de Opção posicionados mais abaixo
         JPanel painelBotoes = new JPanel(new GridBagLayout());
         painelBotoes.setOpaque(false);
+        painelBotoes.setBorder(new EmptyBorder(160, 0, 20, 0)); // Empurra os botões alguns pixels para baixo
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(12, 0, 12, 0);
+        gbc.insets = new Insets(10, 0, 10, 0);
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.gridx = 0;
 
@@ -112,8 +113,8 @@ public class JanelaMenuInicial extends JFrame {
 
     private JButton criarBotaoMenu(String texto, Color corFundo) {
         JButton btn = new JButton(texto);
-        btn.setPreferredSize(new Dimension(2800, 48));
-        btn.setFont(new Font("Arial", Font.BOLD, 13));
+        btn.setPreferredSize(new Dimension(300, 48));
+        btn.setFont(new Font("Arial", Font.BOLD, 14));
         btn.setBackground(corFundo);
         btn.setForeground(Color.WHITE);
         btn.setFocusPainted(false);

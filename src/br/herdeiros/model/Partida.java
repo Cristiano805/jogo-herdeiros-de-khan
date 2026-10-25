@@ -7,10 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Ponto de entrada (API / Façade) do componente Model para gerenciar partidas de Herdeiros de Khan.
- * Centraliza as regras de negócio, turno, movimentação, tributos e saques de cidades.
- */
+
 public class Partida {
     private Map<Cor, Jogador> jogadores;
     private List<Cor> ordemTurnos;

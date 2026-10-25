@@ -1,89 +1,97 @@
 package br.herdeiros.controller;
 
+import br.herdeiros.model.Partida;
 import br.herdeiros.view.JanelaPrincipal;
+import br.herdeiros.view.MapaCoordenadas;
 import br.herdeiros.view.PainelTabuleiro;
 
-import java.awt.Color; 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.PrintStream;
 
+/**
+ * Controlador da aplicação (Controller do MVC).
+ * Intermedia as ações do jogador entre a View e o componente Model (Partida).
+ * SEM uso de expressões lambda em listeners (regra obrigatória da disciplina).
+ */
 public class JogoController {
-    
-    private JanelaPrincipal view;
-    private int passosDisponiveis = 0; // Guarda a soma dos dados lançados
 
-    public JogoController(JanelaPrincipal view) {
-        this.view = view; 
-        
-        // Configura o ouvinte de cliques no tabuleiro
+    private Partida partida;
+    private JanelaPrincipal view;
+    private int movimentosRestantes = 0;
+
+    public JogoController(Partida partida, JanelaPrincipal view) {
+        this.partida = partida;
+        this.view = view;
+
+        configurarOuvintes();
+        atualizarInterface();
+    }
+
+    private void configurarOuvintes() {
+        // 1. Ouvinte de cliques no tabuleiro (movimentação para parada/cidade vizinha)
         this.view.getPainelTabuleiro().setOuvinteClique(new PainelTabuleiro.OuvinteCliqueTabuleiro() {
             @Override
             public void aoClicarNoTabuleiro(int x, int y) {
-                // 1. Verifica se o jogador já lançou os dados antes de clicar no tabuleiro
-                if (passosDisponiveis <= 0) {
-                    System.out.println("Clique ignorado: você precisa lançar os dados primeiro!");
-                    return;
-                }
-
-                // 2. Mapeia o clique (x, y) para uma casa/cômodo
-                String destino = identificarCasaClicada(x, y);
-                
-                if (destino != null) {
-                    // 3. Validação do movimento (Aqui integrará com o seu Model futuramente)
-                    boolean movimentoValido = true; // Simulando movimento válido por enquanto
-                    
-                    if (movimentoValido) {
-                        System.out.println("Movimento efetuado com sucesso para: " + destino + " (Gastou " + passosDisponiveis + " passos)");
-                        
-                        // Redesenha o tabuleiro para refletir a nova posição do pião
-                        view.getPainelTabuleiro().repaint();
-                        
-                        // Zera os passos após o movimento para obrigar a rolar os dados novamente
-                        passosDisponiveis = 0; 
-                    } else {
-                        // Movimento inválido: A regra exige que NÃO SE FAÇA NADA (sem mensagens de erro)[cite: 11]
-                    }
-                }
+                processarCliqueNoTabuleiro(x, y);
             }
         });
-        
-        iniciarControles();
-    }
 
-    private void iniciarControles() {
-        this.view.getPainelControle().getBtnJogarDados().addActionListener(new ActionListener() {
+        // 2. Ouvinte do botão Encerrar Turno (passa a vez para o próximo jogador)
+        this.view.getPainelControle().getBtnEncerrarTurno().addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Lê os valores definidos pelo testador nas caixas JComboBox
-                int dado1 = (int) view.getPainelControle().getComboDado1().getSelectedItem();
-                int dado2 = (int) view.getPainelControle().getComboDado2().getSelectedItem();
-                
-                // Soma os dados para definir quantos passos o jogador pode andar
-                passosDisponiveis = dado1 + dado2;
-                
-                // Envia os números e a cor do jogador para o painel desenhar
-                view.getPainelControle().getPainelDados().atualizarDados(dado1, dado2, Color.BLUE);
-                
-                System.out.println("Dados lançados! Passos disponíveis para este turno: " + passosDisponiveis);
+                encerrarTurnoAtual();
+            }
+        });
+
+        // 3. Ouvinte do modo testador (define os movimentos / cavalos disponíveis)
+        this.view.getPainelControle().getBtnDefinirMovimentos().addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                definirMovimentosTestador();
             }
         });
     }
 
-    // Método auxiliar para traduzir as coordenadas (x, y) do ecrã numa casa do jogo
-    private String identificarCasaClicada(int x, int y) {
-        System.out.println("Coordenadas do clique recebidas -> X: " + x + ", Y: " + y);
-        
-        // Exemplo genérico de zona (pode ajustar depois conforme o seu tabuleiro)
-        if (x >= 50 && x <= 250 && y >= 50 && y <= 250) {
-            return "Cozinha";
+    private void processarCliqueNoTabuleiro(int x, int y) {
+        if (movimentosRestantes <= 0) {
+            // Sem movimentos disponíveis: de acordo com a especificação, não se deve exibir pop-up
+            return;
         }
-        
-        return "Casa Genérica (X: " + x + ", Y: " + y + ")";
+
+        int largura = view.getPainelTabuleiro().getWidth();
+        int altura = view.getPainelTabuleiro().getHeight();
+
+        String destino = MapaCoordenadas.identificarLocalizacaoClicada(x, y, largura, altura);
+        if (destino == null) {
+            return;
+        }
+
+        // Tenta realizar o movimento através do Model
+        boolean moveu = partida.moverJogadorAtual(destino);
+        if (moveu) {
+            movimentosRestantes--;
+            atualizarInterface();
+        } else {
+            // Movimento inválido: a regra exige silêncio, sem mensagens de erro e sem passar o turno
+        }
     }
 
-	private Object println(String string) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    private void encerrarTurnoAtual() {
+        partida.passarTurno();
+        movimentosRestantes = 0;
+        atualizarInterface();
+    }
+
+    private void definirMovimentosTestador() {
+        Object item = view.getPainelControle().getComboMovimentos().getSelectedItem();
+        if (item instanceof Integer) {
+            movimentosRestantes = (Integer) item;
+            atualizarInterface();
+        }
+    }
+
+    private void atualizarInterface() {
+        view.atualizarView(movimentosRestantes);
+    }
 }

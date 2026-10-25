@@ -1,5 +1,7 @@
 package br.herdeiros.view;
 
+import br.herdeiros.model.Partida;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -10,74 +12,94 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 
+/**
+ * Painel lateral de controle da partida.
+ * Oferece ações de turno (Encerrar Turno) e modo testador (forçar quantidade de movimentos/cavalos).
+ * Os dados foram completamente removidos de acordo com as regras de Herdeiros de Khan.
+ */
 public class PainelControle extends JPanel {
-    
-    private JButton btnJogarDados;
-    private JComboBox<Integer> comboDado1;
-    private JComboBox<Integer> comboDado2;
-    private PainelDados painelDados;
-    
-    public PainelControle() {
-        // Define a largura do painel lateral (300px) e um fundo suave
+
+    private Partida partida;
+    private PainelStatusTurno painelStatus;
+    private JButton btnEncerrarTurno;
+    private JComboBox<Integer> comboMovimentos;
+    private JButton btnDefinirMovimentos;
+
+    public PainelControle(Partida partida) {
+        this.partida = partida;
+
         setPreferredSize(new Dimension(300, 1050));
         setBackground(new Color(240, 240, 245));
         setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 10, 15));
-        
+
         // Título principal do painel lateral
         JLabel lblTitulo = new JLabel("HERDEIROS DE KHAN");
         lblTitulo.setFont(new Font("Arial", Font.BOLD, 16));
         lblTitulo.setForeground(new Color(40, 40, 40));
         add(lblTitulo);
-        
-        // 1. Painel de Dados com Borda Estilizada e Título
-        painelDados = new PainelDados();
-        painelDados.setBorder(BorderFactory.createTitledBorder(
-            BorderFactory.createLineBorder(new Color(180, 180, 180)), 
-            "Estado / Dados da Jogada", 
-            TitledBorder.LEFT, 
-            TitledBorder.TOP, 
-            new Font("Arial", Font.BOLD, 12), 
-            new Color(80, 80, 80)
+
+        // 1. Painel com status visual do jogador da vez e movimentos restantes
+        painelStatus = new PainelStatusTurno(partida);
+        painelStatus.setBorder(BorderFactory.createTitledBorder(
+                BorderFactory.createLineBorder(new Color(180, 180, 180)),
+                "Turno / Estado da Jogada",
+                TitledBorder.LEFT,
+                TitledBorder.TOP,
+                new Font("Arial", Font.BOLD, 12),
+                new Color(80, 80, 80)
         ));
-        add(painelDados);
-        
-        // 2. Botão de rolar os dados com aspeto moderno
-        btnJogarDados = new JButton("Jogar Dados");
-        btnJogarDados.setPreferredSize(new Dimension(260, 45));
-        btnJogarDados.setFont(new Font("Arial", Font.BOLD, 14));
-        btnJogarDados.setBackground(new Color(41, 128, 185)); // Azul elegante
-        btnJogarDados.setForeground(Color.WHITE);
-        btnJogarDados.setFocusPainted(false);
-        add(btnJogarDados);
-        
-        // 3. Secção do Modo Testador agrupada num painel dedicado
+        add(painelStatus);
+
+        // 2. Botão principal para encerrar o turno do jogador atual
+        btnEncerrarTurno = new JButton("Encerrar Turno");
+        btnEncerrarTurno.setPreferredSize(new Dimension(260, 45));
+        btnEncerrarTurno.setFont(new Font("Arial", Font.BOLD, 14));
+        btnEncerrarTurno.setBackground(new Color(41, 128, 185));
+        btnEncerrarTurno.setForeground(Color.WHITE);
+        btnEncerrarTurno.setFocusPainted(false);
+        add(btnEncerrarTurno);
+
+        // 3. Painel do Modo Testador (permite forçar a quantidade de movimentos de cavalos)
         JPanel painelTestador = new JPanel();
-        painelTestador.setPreferredSize(new Dimension(260, 90));
+        painelTestador.setPreferredSize(new Dimension(260, 110));
         painelTestador.setBackground(Color.WHITE);
         painelTestador.setBorder(BorderFactory.createTitledBorder(
-            BorderFactory.createLineBorder(new Color(200, 200, 200)), 
-            "Modo Testador (Forçar Dados)", 
-            TitledBorder.LEFT, 
-            TitledBorder.TOP, 
-            new Font("Arial", Font.BOLD, 11), 
-            new Color(100, 100, 100)
+                BorderFactory.createLineBorder(new Color(200, 200, 200)),
+                "Modo Testador (Cavalos / Movimento)",
+                TitledBorder.LEFT,
+                TitledBorder.TOP,
+                new Font("Arial", Font.BOLD, 11),
+                new Color(100, 100, 100)
         ));
-        
-        Integer[] valores = {1, 2, 3, 4, 5, 6};
-        comboDado1 = new JComboBox<>(valores);
-        comboDado2 = new JComboBox<>(valores);
-        
-        painelTestador.add(new JLabel("D1:"));
-        painelTestador.add(comboDado1);
-        painelTestador.add(new JLabel("D2:"));
-        painelTestador.add(comboDado2);
-        
+
+        Integer[] opcoesCavalos = {1, 2, 3, 4, 5, 6};
+        comboMovimentos = new JComboBox<Integer>(opcoesCavalos);
+        comboMovimentos.setPreferredSize(new Dimension(70, 28));
+
+        btnDefinirMovimentos = new JButton("Definir Movimentos");
+        btnDefinirMovimentos.setPreferredSize(new Dimension(240, 32));
+        btnDefinirMovimentos.setFont(new Font("Arial", Font.PLAIN, 12));
+
+        painelTestador.add(new JLabel("Cavalos:"));
+        painelTestador.add(comboMovimentos);
+        painelTestador.add(btnDefinirMovimentos);
+
         add(painelTestador);
     }
 
-    // Métodos Getters para o Controller aceder aos componentes
-    public JButton getBtnJogarDados() { return btnJogarDados; }
-    public JComboBox<Integer> getComboDado1() { return comboDado1; }
-    public JComboBox<Integer> getComboDado2() { return comboDado2; }
-    public PainelDados getPainelDados() { return painelDados; }
+    public JButton getBtnEncerrarTurno() {
+        return btnEncerrarTurno;
+    }
+
+    public JComboBox<Integer> getComboMovimentos() {
+        return comboMovimentos;
+    }
+
+    public JButton getBtnDefinirMovimentos() {
+        return btnDefinirMovimentos;
+    }
+
+    public PainelStatusTurno getPainelStatus() {
+        return painelStatus;
+    }
 }

@@ -1,24 +1,32 @@
 package br.herdeiros.view;
 
-import javax.swing.JFrame;
-import java.awt.BorderLayout;
+import br.herdeiros.model.Partida;
 
+import java.awt.BorderLayout;
+import javax.swing.JFrame;
+
+/**
+ * Janela principal da aplicação (respeita o limite máximo de 1400x1050 pixels).
+ */
 public class JanelaPrincipal extends JFrame {
-    
+
+    private Partida partida;
     private PainelTabuleiro painelTabuleiro;
     private PainelControle painelControle;
 
-    public JanelaPrincipal() {
+    public JanelaPrincipal(Partida partida) {
+        this.partida = partida;
+
         setTitle("Herdeiros de Khan");
-        setSize(1400, 1050); 
+        setSize(1400, 1020);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setResizable(false); 
-        setLocationRelativeTo(null); 
+        setResizable(false);
+        setLocationRelativeTo(null);
         setLayout(new BorderLayout());
-        
-        painelTabuleiro = new PainelTabuleiro();
-        painelControle = new PainelControle();
-        
+
+        painelTabuleiro = new PainelTabuleiro(partida);
+        painelControle = new PainelControle(partida);
+
         add(painelTabuleiro, BorderLayout.CENTER);
         add(painelControle, BorderLayout.EAST);
     }
@@ -27,7 +35,20 @@ public class JanelaPrincipal extends JFrame {
         setVisible(true);
     }
 
-    // Getters essenciais para o Controller
-    public PainelControle getPainelControle() { return painelControle; }
-    public PainelTabuleiro getPainelTabuleiro() { return painelTabuleiro; }
+    public void atualizarView(int movimentosRestantes) {
+        painelStatus().atualizarStatus(movimentosRestantes);
+        painelTabuleiro.repaint();
+    }
+
+    public PainelControle getPainelControle() {
+        return painelControle;
+    }
+
+    public PainelTabuleiro getPainelTabuleiro() {
+        return painelTabuleiro;
+    }
+
+    public PainelStatusTurno painelStatus() {
+        return painelControle.getPainelStatus();
+    }
 }

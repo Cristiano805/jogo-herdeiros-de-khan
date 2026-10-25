@@ -55,7 +55,7 @@ public class JanelaEscolhaPersonagens extends JFrame {
     private List<LinhaJogador> linhasJogadores;
 
     private static class LinhaJogador {
-        JTextField campoNome;
+        JComboBox<String> comboNomeHerdeiro;
         JComboBox<Cor> comboCor;
         JSpinner spinnerDescendentes;
     }
@@ -180,8 +180,8 @@ public class JanelaEscolhaPersonagens extends JFrame {
         painelCamposJogadores.removeAll();
         linhasJogadores.clear();
 
-        // Nomes oficiais dos herdeiros que possuem cartela no jogo
-        String[] nomesPadrao = {"Altani", "Chagatai", "Jochi", "Ogedei", "Tolui"};
+        // 5 Herdeiros oficiais do jogo
+        final String[] herdeirosOficiais = {"Altani", "Chagatai", "Jochi", "Ogedei", "Tolui"};
         Cor[] coresPadrao = {Cor.VERMELHO, Cor.AZUL, Cor.VERDE, Cor.AMARELO, Cor.LARANJA};
         int[] descendentesPadrao = {4, 2, 5, 3, 1};
 
@@ -199,25 +199,26 @@ public class JanelaEscolhaPersonagens extends JFrame {
                     new Color(70, 70, 80)
             ));
 
-            JTextField txtNome = new JTextField(nomesPadrao[i], 14);
-            txtNome.setFont(new Font("Arial", Font.PLAIN, 13));
+            JComboBox<String> comboHerdeiro = new JComboBox<String>(herdeirosOficiais);
+            comboHerdeiro.setSelectedIndex(i % herdeirosOficiais.length);
+            comboHerdeiro.setPreferredSize(new Dimension(130, 28));
 
             JComboBox<Cor> comboCor = new JComboBox<Cor>(todasCoresDisponiveis);
-            comboCor.setSelectedItem(coresPadrao[i]);
-            comboCor.setPreferredSize(new Dimension(120, 28));
+            comboCor.setSelectedItem(coresPadrao[i % coresPadrao.length]);
+            comboCor.setPreferredSize(new Dimension(110, 28));
 
-            JSpinner spinDesc = new JSpinner(new SpinnerNumberModel(descendentesPadrao[i], 0, 20, 1));
+            JSpinner spinDesc = new JSpinner(new SpinnerNumberModel(descendentesPadrao[i % descendentesPadrao.length], 0, 20, 1));
             spinDesc.setPreferredSize(new Dimension(60, 28));
 
-            cardJogador.add(new JLabel("Nome:"));
-            cardJogador.add(txtNome);
+            cardJogador.add(new JLabel("Herdeiro:"));
+            cardJogador.add(comboHerdeiro);
             cardJogador.add(new JLabel("Cor do Peão:"));
             cardJogador.add(comboCor);
             cardJogador.add(new JLabel("Descendentes:"));
             cardJogador.add(spinDesc);
 
             LinhaJogador linha = new LinhaJogador();
-            linha.campoNome = txtNome;
+            linha.comboNomeHerdeiro = comboHerdeiro;
             linha.comboCor = comboCor;
             linha.spinnerDescendentes = spinDesc;
             linhasJogadores.add(linha);
@@ -232,18 +233,23 @@ public class JanelaEscolhaPersonagens extends JFrame {
     private void validarEConfirmar() {
         List<DadosJogadorConfig> listaFinal = new ArrayList<DadosJogadorConfig>();
         Set<Cor> coresEscolhidas = new HashSet<Cor>();
+        Set<String> herdeirosEscolhidos = new HashSet<String>();
 
         for (int i = 0; i < linhasJogadores.size(); i++) {
             LinhaJogador linha = linhasJogadores.get(i);
-            String nome = linha.campoNome.getText().trim();
-            if (nome.isEmpty()) {
-                nome = "Jogador " + (i + 1);
+            String nome = (String) linha.comboNomeHerdeiro.getSelectedItem();
+            if (herdeirosEscolhidos.contains(nome)) {
+                JOptionPane.showMessageDialog(this,
+                        "Cada participante deve escolher um herdeiro diferente. Herdeiro repetido: " + nome,
+                        "Herdeiros Conflitantes", JOptionPane.WARNING_MESSAGE);
+                return;
             }
+            herdeirosEscolhidos.add(nome);
 
             Cor cor = (Cor) linha.comboCor.getSelectedItem();
             if (coresEscolhidas.contains(cor)) {
                 JOptionPane.showMessageDialog(this,
-                        "Cada jogador deve escolher uma cor única. Cor repetida: " + cor,
+                        "Cada jogador deve escolher uma cor única para seu peão. Cor repetida: " + cor,
                         "Cores Conflitantes", JOptionPane.WARNING_MESSAGE);
                 return;
             }

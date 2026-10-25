@@ -32,13 +32,15 @@ import javax.swing.border.EmptyBorder;
 public class JanelaCartelas extends JFrame {
 
     private Partida partida;
-    private Map<Cor, Image> cacheCartelas;
+    private Map<String, Image> cacheCartelasPorNome;
+    private Map<Cor, Image> cacheCartelasPorCor;
     private JLabel lblJogador;
     private PainelExibicaoCartela painelExibicao;
 
     public JanelaCartelas(Partida partida) {
         this.partida = partida;
-        this.cacheCartelas = new HashMap<Cor, Image>();
+        this.cacheCartelasPorNome = new HashMap<String, Image>();
+        this.cacheCartelasPorCor = new HashMap<Cor, Image>();
 
         setTitle("Herdeiros de Khan - Meu Tabuleiro (Cartela)");
         setSize(950, 720);
@@ -75,9 +77,7 @@ public class JanelaCartelas extends JFrame {
         painelTopo.add(btnFechar, BorderLayout.EAST);
         painelPrincipal.add(painelTopo, BorderLayout.NORTH);
 
-        // Painel Central com renderização Java2D da cartela
-        Cor corInicial = (partida != null) ? partida.getCorJogadorAtual() : Cor.VERMELHO;
-        painelExibicao = new PainelExibicaoCartela(corInicial);
+        painelExibicao = new PainelExibicaoCartela();
         painelPrincipal.add(painelExibicao, BorderLayout.CENTER);
 
         add(painelPrincipal);
@@ -85,19 +85,22 @@ public class JanelaCartelas extends JFrame {
     }
 
     private void carregarCartelas() {
-        carregarImagem(Cor.VERMELHO, "img/cartelas/cartela_altani.jpg");
-        carregarImagem(Cor.AZUL, "img/cartelas/cartela_chagatai.jpg");
-        carregarImagem(Cor.VERDE, "img/cartelas/cartela_jochi.jpg");
-        carregarImagem(Cor.AMARELO, "img/cartelas/cartela_ogedei.jpg");
-        carregarImagem(Cor.LARANJA, "img/cartelas/cartela_tolui.jpg");
-        carregarImagem(Cor.PRETO, "img/cartelas/cartela_altani.jpg");
+        carregarPorNomeECor("altani", Cor.VERMELHO, "img/cartelas/cartela_altani.jpg");
+        carregarPorNomeECor("chagatai", Cor.AZUL, "img/cartelas/cartela_chagatai.jpg");
+        carregarPorNomeECor("jochi", Cor.VERDE, "img/cartelas/cartela_jochi.jpg");
+        carregarPorNomeECor("ogedei", Cor.AMARELO, "img/cartelas/cartela_ogedei.jpg");
+        carregarPorNomeECor("tolui", Cor.LARANJA, "img/cartelas/cartela_tolui.jpg");
     }
 
-    private void carregarImagem(Cor cor, String caminho) {
+    private void carregarPorNomeECor(String nomeHerdeiro, Cor cor, String caminho) {
         try {
             File f = new File(caminho);
             if (f.exists()) {
-                cacheCartelas.put(cor, ImageIO.read(f));
+                Image img = ImageIO.read(f);
+                cacheCartelasPorNome.put(nomeHerdeiro.toLowerCase(), img);
+                if (cor != null) {
+                    cacheCartelasPorCor.put(cor, img);
+                }
             }
         } catch (IOException e) {
             System.err.println("Erro ao carregar cartela " + caminho + ": " + e.getMessage());
@@ -108,19 +111,20 @@ public class JanelaCartelas extends JFrame {
         if (partida == null) return;
         Cor corVez = partida.getCorJogadorAtual();
         String nome = partida.getNomeJogadorAtual();
-        lblJogador.setText("Tabuleiro de: " + nome + " (" + corVez + ")");
-        painelExibicao.setCorAtual(corVez);
+        lblJogador.setText("Tabuleiro / Cartela de: " + nome + " (" + corVez + ")");
+        painelExibicao.setJogadorAtual(nome, corVez);
     }
 
     private class PainelExibicaoCartela extends JPanel {
+        private String nomeHerdeiro;
         private Cor corAtual;
 
-        public PainelExibicaoCartela(Cor corInicial) {
-            this.corAtual = corInicial;
+        public PainelExibicaoCartela() {
             setBackground(new Color(230, 230, 235));
         }
 
-        public void setCorAtual(Cor cor) {
+        public void setJogadorAtual(String nomeHerdeiro, Cor cor) {
+            this.nomeHerdeiro = nomeHerdeiro;
             this.corAtual = cor;
             repaint();
         }
@@ -133,7 +137,14 @@ public class JanelaCartelas extends JFrame {
             g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-            Image img = cacheCartelas.get(corAtual);
+            Image img = null;
+            if (nomeHerdeiro != null) {
+                img = cacheCartelasPorNome.get(nomeHerdeiro.toLowerCase().trim());
+            }
+            if (img == null && corAtual != null) {
+                img = cacheCartelasPorCor.get(corAtual);
+            }
+
             if (img != null) {
                 int painelW = getWidth();
                 int painelH = getHeight();
@@ -150,7 +161,7 @@ public class JanelaCartelas extends JFrame {
             } else {
                 g2d.setColor(Color.DARK_GRAY);
                 g2d.setFont(new Font("Arial", Font.BOLD, 16));
-                g2d.drawString("Cartela não encontrada para a cor " + corAtual, 30, 50);
+                g2d.drawString("Cartela não encontrada para o herdeiro " + nomeHerdeiro, 30, 50);
             }
         }
     }

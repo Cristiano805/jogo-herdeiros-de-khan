@@ -31,7 +31,12 @@ public class Main {
 
             @Override
             public void aoContinuarJogoSalvo() {
-                // Funcionalidade que será conectada ao sistema de persistência da 3ª iteração
+                javax.swing.JOptionPane.showMessageDialog(
+                        refMenu[0],
+                        "A funcionalidade de carregar partidas salvas estará disponível na 3ª iteração\n(persistência de estado via serialização ObjectOutputStream / ObjectInputStream).",
+                        "Continuar Jogo Salvo",
+                        javax.swing.JOptionPane.INFORMATION_MESSAGE
+                );
             }
         });
 

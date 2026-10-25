@@ -55,21 +55,7 @@ public class JanelaMenuInicial extends JFrame {
         painelPrincipal.setBackground(new Color(245, 245, 250));
         painelPrincipal.setBorder(new EmptyBorder(30, 40, 30, 40));
 
-        // Título e Subtítulo
-        JPanel painelCabecalho = new JPanel(new BorderLayout());
-        painelCabecalho.setOpaque(false);
 
-        JLabel lblTitulo = new JLabel("HERDEIROS DE KHAN", JLabel.CENTER);
-        lblTitulo.setFont(new Font("Arial", Font.BOLD, 28));
-        lblTitulo.setForeground(new Color(40, 40, 50));
-
-        JLabel lblSubtitulo = new JLabel("Disputa pelo Conselho Kurultai no Império Mongol", JLabel.CENTER);
-        lblSubtitulo.setFont(new Font("Arial", Font.ITALIC, 14));
-        lblSubtitulo.setForeground(new Color(110, 110, 120));
-
-        painelCabecalho.add(lblTitulo, BorderLayout.NORTH);
-        painelCabecalho.add(lblSubtitulo, BorderLayout.SOUTH);
-        painelPrincipal.add(painelCabecalho, BorderLayout.NORTH);
 
         // Botões Centrais de Opção
         JPanel painelBotoes = new JPanel(new GridBagLayout());
@@ -121,20 +107,13 @@ public class JanelaMenuInicial extends JFrame {
         painelBotoes.add(btnSair, gbc);
 
         painelPrincipal.add(painelBotoes, BorderLayout.CENTER);
-
-        // Rodapé de Créditos
-        JLabel lblRodape = new JLabel("INF1636 - Programação Orientada a Objetos", JLabel.CENTER);
-        lblRodape.setFont(new Font("Arial", Font.PLAIN, 11));
-        lblRodape.setForeground(Color.GRAY);
-        painelPrincipal.add(lblRodape, BorderLayout.SOUTH);
-
         add(painelPrincipal);
     }
 
     private JButton criarBotaoMenu(String texto, Color corFundo) {
         JButton btn = new JButton(texto);
-        btn.setPreferredSize(new Dimension(280, 48));
-        btn.setFont(new Font("Arial", Font.BOLD, 15));
+        btn.setPreferredSize(new Dimension(2800, 48));
+        btn.setFont(new Font("Arial", Font.BOLD, 13));
         btn.setBackground(corFundo);
         btn.setForeground(Color.WHITE);
         btn.setFocusPainted(false);

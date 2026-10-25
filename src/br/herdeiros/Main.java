@@ -70,6 +70,7 @@ public class Main {
 
         // Regra oficial de Herdeiros de Khan: o jogador com o maior número de descendentes começa
         partida.definirPrimeiroJogadorPorDescendentes();
+       
 
         // 3ª Janela: Exibição do Tabuleiro e do Painel de Controle via MVC
         JanelaPrincipal janelaTabuleiro = new JanelaPrincipal(partida);

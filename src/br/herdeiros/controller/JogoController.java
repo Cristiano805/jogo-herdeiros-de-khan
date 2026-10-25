@@ -51,11 +51,39 @@ public class JogoController {
                 definirMovimentosTestador();
             }
         });
+
+        // 4. Ouvinte para abrir a Janela de Cartelas dos Herdeiros
+        this.view.getPainelControle().getBtnVerCartelas().addActionListener(new ActionListener() {
+            private br.herdeiros.view.JanelaCartelas janelaCartelas;
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (janelaCartelas == null || !janelaCartelas.isDisplayable()) {
+                    janelaCartelas = new br.herdeiros.view.JanelaCartelas(partida);
+                }
+                janelaCartelas.sincronizarComJogadorDaVez();
+                janelaCartelas.setVisible(true);
+                janelaCartelas.toFront();
+            }
+        });
+
+        // 5. Ouvinte para abrir a Janela de Inventário de Recursos
+        this.view.getPainelControle().getBtnVerInventario().addActionListener(new ActionListener() {
+            private br.herdeiros.view.JanelaInventario janelaInventario;
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (janelaInventario == null || !janelaInventario.isDisplayable()) {
+                    janelaInventario = new br.herdeiros.view.JanelaInventario(partida);
+                }
+                janelaInventario.atualizarInventario();
+                janelaInventario.setVisible(true);
+                janelaInventario.toFront();
+            }
+        });
     }
 
     private void processarCliqueNoTabuleiro(int x, int y) {
         if (movimentosRestantes <= 0) {
-            // Sem movimentos disponíveis: de acordo com a especificação, não se deve exibir pop-up
+            System.out.println("[DEBUG] Clique ignorado: defina movimentos no Modo Testador primeiro!");
             return;
         }
 
@@ -63,12 +91,16 @@ public class JogoController {
         int altura = view.getPainelTabuleiro().getHeight();
 
         String destino = MapaCoordenadas.identificarLocalizacaoClicada(x, y, largura, altura);
+        System.out.println("[DEBUG] Clique em (" + x + ", " + y + ") na tela (" + largura + "x" + altura + ") : Destino identificado: " + destino);
+
         if (destino == null) {
+            System.out.println("[DEBUG] Nenhuma localidade reconhecida perto do clique.");
             return;
         }
 
         // Tenta realizar o movimento através do Model
         boolean moveu = partida.moverJogadorAtual(destino);
+        System.out.println("[DEBUG] Tentativa de mover para " + destino + ": " + (moveu ? "SUCESSO" : "RECUSADO PELO MODEL (nao sao vizinhas)"));
         if (moveu) {
             movimentosRestantes--;
             atualizarInterface();

@@ -22,6 +22,8 @@ public class PainelControle extends JPanel {
     private Partida partida;
     private PainelStatusTurno painelStatus;
     private JButton btnEncerrarTurno;
+    private JButton btnVerCartelas;
+    private JButton btnVerInventario;
     private JComboBox<Integer> comboMovimentos;
     private JButton btnDefinirMovimentos;
 
@@ -59,6 +61,23 @@ public class PainelControle extends JPanel {
         btnEncerrarTurno.setFocusPainted(false);
         add(btnEncerrarTurno);
 
+        // 2.1 Botões auxiliares para Cartelas e Inventário
+        btnVerCartelas = new JButton("Ver Tabuleiros (Cartelas)");
+        btnVerCartelas.setPreferredSize(new Dimension(260, 36));
+        btnVerCartelas.setFont(new Font("Arial", Font.BOLD, 12));
+        btnVerCartelas.setBackground(new Color(52, 73, 94));
+        btnVerCartelas.setForeground(Color.WHITE);
+        btnVerCartelas.setFocusPainted(false);
+        add(btnVerCartelas);
+
+        btnVerInventario = new JButton("Ver Inventário de Recursos");
+        btnVerInventario.setPreferredSize(new Dimension(260, 36));
+        btnVerInventario.setFont(new Font("Arial", Font.BOLD, 12));
+        btnVerInventario.setBackground(new Color(39, 174, 96));
+        btnVerInventario.setForeground(Color.WHITE);
+        btnVerInventario.setFocusPainted(false);
+        add(btnVerInventario);
+
         // 3. Painel do Modo Testador (permite forçar a quantidade de movimentos de cavalos)
         JPanel painelTestador = new JPanel();
         painelTestador.setPreferredSize(new Dimension(260, 110));
@@ -89,6 +108,14 @@ public class PainelControle extends JPanel {
 
     public JButton getBtnEncerrarTurno() {
         return btnEncerrarTurno;
+    }
+
+    public JButton getBtnVerCartelas() {
+        return btnVerCartelas;
+    }
+
+    public JButton getBtnVerInventario() {
+        return btnVerInventario;
     }
 
     public JComboBox<Integer> getComboMovimentos() {

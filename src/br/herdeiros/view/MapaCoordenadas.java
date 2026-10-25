@@ -14,7 +14,7 @@ public class MapaCoordenadas {
     // Dimensão de referência da imagem base (1923 x 1930)
     private static final double LARGURA_BASE = 1923.0;
     private static final double ALTURA_BASE = 1930.0;
-    private static final int RAIO_CLIQUE = 70;
+    private static final int RAIO_CLIQUE = 110;
 
     static {
         // Coordenadas aproximadas dos centros no mapa original

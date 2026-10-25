@@ -34,7 +34,24 @@ public class JanelaMenuInicial extends JFrame {
         setResizable(false);
         setLocationRelativeTo(null);
 
-        JPanel painelPrincipal = new JPanel(new BorderLayout());
+        JPanel painelPrincipal = new JPanel(new BorderLayout()) {
+            private java.awt.Image imgFundo;
+            {
+                try {
+                    java.io.File f = new java.io.File("img/plano_de_fundo.jpg");
+                    if (f.exists()) {
+                        imgFundo = javax.imageio.ImageIO.read(f);
+                    }
+                } catch (Exception e) {}
+            }
+            @Override
+            protected void paintComponent(java.awt.Graphics g) {
+                super.paintComponent(g);
+                if (imgFundo != null) {
+                    g.drawImage(imgFundo, 0, 0, getWidth(), getHeight(), this);
+                }
+            }
+        };
         painelPrincipal.setBackground(new Color(245, 245, 250));
         painelPrincipal.setBorder(new EmptyBorder(30, 40, 30, 40));
 

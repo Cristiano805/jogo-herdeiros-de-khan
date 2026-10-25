@@ -23,6 +23,7 @@ public class PainelControle extends JPanel {
     private PainelStatusTurno painelStatus;
     private JButton btnEncerrarTurno;
     private JButton btnVerCartelas;
+    private JButton btnVerCartas;
     private JButton btnVerInventario;
     private JComboBox<Integer> comboMovimentos;
     private JButton btnDefinirMovimentos;
@@ -61,17 +62,25 @@ public class PainelControle extends JPanel {
         btnEncerrarTurno.setFocusPainted(false);
         add(btnEncerrarTurno);
 
-        // 2.1 Botões auxiliares para Cartelas e Inventário
+        // 2.1 Botões auxiliares para Cartelas, Cartas e Inventário
         btnVerCartelas = new JButton("Ver Meu Tabuleiro (Cartela)");
-        btnVerCartelas.setPreferredSize(new Dimension(260, 36));
+        btnVerCartelas.setPreferredSize(new Dimension(260, 34));
         btnVerCartelas.setFont(new Font("Arial", Font.BOLD, 12));
         btnVerCartelas.setBackground(new Color(52, 73, 94));
         btnVerCartelas.setForeground(Color.WHITE);
         btnVerCartelas.setFocusPainted(false);
         add(btnVerCartelas);
 
+        btnVerCartas = new JButton("Ver Minhas Cartas (Conselheiros)");
+        btnVerCartas.setPreferredSize(new Dimension(260, 34));
+        btnVerCartas.setFont(new Font("Arial", Font.BOLD, 12));
+        btnVerCartas.setBackground(new Color(142, 68, 173));
+        btnVerCartas.setForeground(Color.WHITE);
+        btnVerCartas.setFocusPainted(false);
+        add(btnVerCartas);
+
         btnVerInventario = new JButton("Ver Meu Inventário");
-        btnVerInventario.setPreferredSize(new Dimension(260, 36));
+        btnVerInventario.setPreferredSize(new Dimension(260, 34));
         btnVerInventario.setFont(new Font("Arial", Font.BOLD, 12));
         btnVerInventario.setBackground(new Color(39, 174, 96));
         btnVerInventario.setForeground(Color.WHITE);
@@ -112,6 +121,10 @@ public class PainelControle extends JPanel {
 
     public JButton getBtnVerCartelas() {
         return btnVerCartelas;
+    }
+
+    public JButton getBtnVerCartas() {
+        return btnVerCartas;
     }
 
     public JButton getBtnVerInventario() {

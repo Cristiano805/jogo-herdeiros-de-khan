@@ -36,6 +36,13 @@ public class Partida {
             return;
         }
         Jogador novoJogador = new Jogador(nome, cor, quantidadeDescendentes);
+        
+        // Distribui as 2 cartas de conselheiro secreto iniciais (regra oficial de preparação, pág. 3)
+        int idx = this.jogadores.size();
+        int pasta = 3 + (idx % 6); // pastas cartas3 a cartas8
+        novoJogador.adicionarCarta("cartas" + pasta + "-1");
+        novoJogador.adicionarCarta("cartas" + pasta + "-2");
+
         this.jogadores.put(cor, novoJogador);
         this.ordemTurnos.add(cor);
         
@@ -82,7 +89,7 @@ public class Partida {
     }
 
     /**
-     * Move o peão do jogador atual para um território vizinho válido.
+     * Move o peão do jogador atual para a localização de destino.
      * @param destino nome da localização de destino.
      * @return true se o movimento foi válido e realizado, false caso contrário.
      */
@@ -91,11 +98,32 @@ public class Partida {
             return false;
         }
         String origem = this.jogadorAtual.getMeuPeao().getLocalizacaoAtual();
-        if (this.tabuleiro.saoVizinhas(origem, destino)) {
+        if (origem.equals(destino)) {
+            return false;
+        }
+        int dist = this.tabuleiro.calcularDistancia(origem, destino);
+        if (dist > 0) {
             this.jogadorAtual.getMeuPeao().mover(destino);
             return true;
         }
         return false;
+    }
+
+    /**
+     * Retorna o menor número de passos (distância no grafo) entre origem e destino.
+     */
+    public int calcularDistancia(String origem, String destino) {
+        return this.tabuleiro.calcularDistancia(origem, destino);
+    }
+
+    /**
+     * Retorna a lista de cartas em posse do jogador atual da vez.
+     */
+    public java.util.List<String> getCartasJogadorAtual() {
+        if (this.jogadorAtual == null) {
+            return java.util.Collections.emptyList();
+        }
+        return this.jogadorAtual.getCartas();
     }
 
     /**

@@ -14,7 +14,7 @@ public class MapaCoordenadas {
     // Dimensão de referência da imagem base (1923 x 1930)
     private static final double LARGURA_BASE = 1923.0;
     private static final double ALTURA_BASE = 1930.0;
-    private static final int RAIO_CLIQUE = 110;
+    private static final int RAIO_CLIQUE = 180;
 
     static {
         // Coordenadas aproximadas dos centros no mapa original
@@ -54,15 +54,19 @@ public class MapaCoordenadas {
         double escalaY = alturaPainel / ALTURA_BASE;
         double raioEscalado = RAIO_CLIQUE * Math.min(escalaX, escalaY);
 
+        String maisProximo = null;
+        double menorDistancia = Double.MAX_VALUE;
+
         for (Map.Entry<String, Point> entry : COORDENADAS_BASE.entrySet()) {
             Point pTela = getCoordenadaTela(entry.getKey(), larguraPainel, alturaPainel);
             if (pTela != null) {
                 double distancia = pTela.distance(xClique, yClique);
-                if (distancia <= raioEscalado) {
-                    return entry.getKey();
+                if (distancia <= raioEscalado && distancia < menorDistancia) {
+                    menorDistancia = distancia;
+                    maisProximo = entry.getKey();
                 }
             }
         }
-        return null;
+        return maisProximo;
     }
 }

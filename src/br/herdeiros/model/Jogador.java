@@ -12,6 +12,7 @@ class Jogador {
     private int quantidadeDescendentes; // Define quem começa jogando
     private int votosKurultai; // Pontuação no tabuleiro
     private Map<TipoTributo, Integer> tributos;
+    private java.util.List<String> cartas;
 
     public Jogador(String nome, Cor cor, int quantidadeDescendentes) {
         this.nome = nome;
@@ -19,12 +20,23 @@ class Jogador {
         this.quantidadeDescendentes = quantidadeDescendentes;
         this.meuPeao = new Peao(this.cor, "Karakorum"); // Todos começam em Karakorum
         this.votosKurultai = 0;
+        this.cartas = new java.util.ArrayList<String>();
         
         // Inicializa o inventário de tributos com HashMap
         this.tributos = new HashMap<>();
         for (TipoTributo tipo : TipoTributo.values()) {
             this.tributos.put(tipo, 0);
         }
+    }
+
+    public void adicionarCarta(String idCarta) {
+        if (idCarta != null) {
+            this.cartas.add(idCarta);
+        }
+    }
+
+    public java.util.List<String> getCartas() {
+        return Collections.unmodifiableList(cartas);
     }
     
     public void ganharVotos(int quantidade) {

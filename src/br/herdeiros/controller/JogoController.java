@@ -66,6 +66,20 @@ public class JogoController {
             }
         });
 
+        // 4.1 Ouvinte para abrir a Janela de Cartas Secretas dos Jogadores (Figura 5 do professor)
+        this.view.getPainelControle().getBtnVerCartas().addActionListener(new ActionListener() {
+            private br.herdeiros.view.JanelaCartas janelaCartas;
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (janelaCartas == null || !janelaCartas.isDisplayable()) {
+                    janelaCartas = new br.herdeiros.view.JanelaCartas(partida);
+                }
+                janelaCartas.sincronizarComJogadorDaVez();
+                janelaCartas.setVisible(true);
+                janelaCartas.toFront();
+            }
+        });
+
         // 5. Ouvinte para abrir a Janela de Inventário de Recursos
         this.view.getPainelControle().getBtnVerInventario().addActionListener(new ActionListener() {
             private br.herdeiros.view.JanelaInventario janelaInventario;
@@ -91,21 +105,28 @@ public class JogoController {
         int altura = view.getPainelTabuleiro().getHeight();
 
         String destino = MapaCoordenadas.identificarLocalizacaoClicada(x, y, largura, altura);
-        System.out.println("[DEBUG] Clique em (" + x + ", " + y + ") na tela (" + largura + "x" + altura + ") : Destino identificado: " + destino);
-
         if (destino == null) {
-            System.out.println("[DEBUG] Nenhuma localidade reconhecida perto do clique.");
+            System.out.println("[DEBUG] Nenhuma localidade reconhecida perto do clique (" + x + ", " + y + ").");
             return;
         }
 
-        // Tenta realizar o movimento através do Model
-        boolean moveu = partida.moverJogadorAtual(destino);
-        System.out.println("[DEBUG] Tentativa de mover para " + destino + ": " + (moveu ? "SUCESSO" : "RECUSADO PELO MODEL (nao sao vizinhas)"));
-        if (moveu) {
-            movimentosRestantes--;
-            atualizarInterface();
+        String origem = partida.getLocalizacaoJogador(partida.getCorJogadorAtual());
+        if (origem == null || origem.equalsIgnoreCase(destino)) {
+            return;
+        }
+
+        int distancia = partida.calcularDistancia(origem, destino);
+        System.out.println("[DEBUG] Tentando mover de " + origem + " para " + destino + ". Distancia no grafo: " + distancia + " (Movimentos disponiveis: " + movimentosRestantes + ")");
+
+        if (distancia > 0 && distancia <= movimentosRestantes) {
+            boolean moveu = partida.moverJogadorAtual(destino);
+            if (moveu) {
+                movimentosRestantes -= distancia;
+                atualizarInterface();
+            }
         } else {
-            // Movimento inválido: a regra exige silêncio, sem mensagens de erro e sem passar o turno
+            // Movimento inválido ou passos insuficientes: a regra exige silêncio total
+            System.out.println("[DEBUG] Movimento recusado: passos insuficientes ou local desconectado.");
         }
     }
 

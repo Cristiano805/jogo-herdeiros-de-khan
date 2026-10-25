@@ -48,10 +48,13 @@ class Tabuleiro {
         String bagda = NomeCidade.BAGDA.getNomeFormatado();
         String tabriz = NomeCidade.TABRIZ.getNomeFormatado();
 
-        // Conexões da Capital com portões de entrada das 3 regiões
+        // Conexões da Capital Karakorum com os principais polos de rota das regiões
         conectar(karakorum, kazan);
         conectar(karakorum, xian);
         conectar(karakorum, samarcanda);
+        conectar(karakorum, moscou);
+        conectar(karakorum, pequim);
+        conectar(karakorum, tabriz);
 
         // Rotas internas da Rússia
         conectar(moscou, kazan);
@@ -71,11 +74,59 @@ class Tabuleiro {
         // Rotas fronteiriças entre regiões
         conectar(kazan, samarcanda);
         conectar(xian, samarcanda);
+        conectar(cantao, tabriz);
     }
 
     private void conectar(String loc1, String loc2) {
-        this.rotas.computeIfAbsent(loc1, k -> new HashSet<>()).add(loc2);
-        this.rotas.computeIfAbsent(loc2, k -> new HashSet<>()).add(loc1);
+        Set<String> s1 = this.rotas.get(loc1);
+        if (s1 == null) {
+            s1 = new HashSet<>();
+            this.rotas.put(loc1, s1);
+        }
+        s1.add(loc2);
+
+        Set<String> s2 = this.rotas.get(loc2);
+        if (s2 == null) {
+            s2 = new HashSet<>();
+            this.rotas.put(loc2, s2);
+        }
+        s2.add(loc1);
+    }
+
+    /**
+     * Calcula o menor número de passos (distância no grafo) entre duas localidades via BFS.
+     * Retorna -1 se não houver caminho ou se alguma localidade for inválida.
+     */
+    public int calcularDistancia(String origem, String destino) {
+        if (origem == null || destino == null) {
+            return -1;
+        }
+        if (origem.equals(destino)) {
+            return 0;
+        }
+        java.util.Queue<String> fila = new java.util.LinkedList<>();
+        Map<String, Integer> distancias = new HashMap<>();
+        fila.add(origem);
+        distancias.put(origem, 0);
+
+        while (!fila.isEmpty()) {
+            String atual = fila.poll();
+            int d = distancias.get(atual);
+
+            Set<String> vizinhas = this.rotas.get(atual);
+            if (vizinhas != null) {
+                for (String v : vizinhas) {
+                    if (!distancias.containsKey(v)) {
+                        distancias.put(v, d + 1);
+                        if (v.equals(destino)) {
+                            return d + 1;
+                        }
+                        fila.add(v);
+                    }
+                }
+            }
+        }
+        return -1;
     }
 
     public boolean saoVizinhas(String loc1, String loc2) {

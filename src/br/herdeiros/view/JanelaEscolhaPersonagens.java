@@ -1,6 +1,5 @@
 package br.herdeiros.view;
 
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -47,6 +46,7 @@ public class JanelaEscolhaPersonagens extends JFrame {
 
     public interface OuvinteConfiguracaoJogo {
         void aoConfirmarConfiguracao(List<DadosJogadorConfig> jogadores);
+
         void aoVoltarMenu();
     }
 
@@ -67,7 +67,7 @@ public class JanelaEscolhaPersonagens extends JFrame {
         this.linhasJogadores = new ArrayList<LinhaJogador>();
 
         setTitle("Herdeiros de Khan - Escolha dos Personagens");
-        setSize(850, 680);
+        setSize(1000, 720);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setResizable(false);
         setLocationRelativeTo(null);
@@ -80,8 +80,10 @@ public class JanelaEscolhaPersonagens extends JFrame {
                     if (f.exists()) {
                         imgFundo = javax.imageio.ImageIO.read(f);
                     }
-                } catch (Exception e) {}
+                } catch (Exception e) {
+                }
             }
+
             @Override
             protected void paintComponent(java.awt.Graphics g) {
                 super.paintComponent(g);
@@ -108,7 +110,7 @@ public class JanelaEscolhaPersonagens extends JFrame {
         lblQtd.setFont(new Font("Arial", Font.BOLD, 14));
         lblQtd.setForeground(Color.WHITE);
 
-        Integer[] opcoesQtd = {2, 3, 4, 5};
+        Integer[] opcoesQtd = { 2, 3, 4, 5 };
         comboQtdJogadores = new JComboBox<Integer>(opcoesQtd);
         comboQtdJogadores.setSelectedItem(3);
         comboQtdJogadores.setPreferredSize(new Dimension(80, 30));
@@ -183,11 +185,11 @@ public class JanelaEscolhaPersonagens extends JFrame {
         linhasJogadores.clear();
 
         // 5 Herdeiros oficiais do jogo
-        final String[] herdeirosOficiais = {"Altani", "Chagatai", "Jochi", "Ogedei", "Tolui"};
-        String[] coresPadrao = {"VERMELHO", "AZUL", "VERDE", "AMARELO", "LARANJA"};
-        int[] descendentesPadrao = {4, 2, 5, 3, 1};
+        final String[] herdeirosOficiais = { "Altani", "Chagatai", "Jochi", "Ogedei", "Tolui" };
+        String[] coresPadrao = { "VERMELHO", "AZUL", "VERDE", "AMARELO", "LARANJA" };
+        int[] descendentesPadrao = { 4, 2, 5, 3, 1 };
 
-        String[] todasCoresDisponiveis = {"VERMELHO", "AZUL", "VERDE", "AMARELO", "LARANJA", "PRETO"};
+        String[] todasCoresDisponiveis = { "VERMELHO", "AZUL", "VERDE", "AMARELO", "LARANJA", "PRETO" };
 
         for (int i = 0; i < qtd; i++) {
             JPanel cardJogador = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 8));
@@ -198,8 +200,7 @@ public class JanelaEscolhaPersonagens extends JFrame {
                     TitledBorder.LEFT,
                     TitledBorder.TOP,
                     new Font("Arial", Font.BOLD, 12),
-                    new Color(70, 70, 80)
-            ));
+                    new Color(70, 70, 80)));
 
             JComboBox<String> comboHerdeiro = new JComboBox<String>(herdeirosOficiais);
             comboHerdeiro.setSelectedIndex(i % herdeirosOficiais.length);
@@ -209,7 +210,8 @@ public class JanelaEscolhaPersonagens extends JFrame {
             comboCor.setSelectedItem(coresPadrao[i % coresPadrao.length]);
             comboCor.setPreferredSize(new Dimension(110, 28));
 
-            JSpinner spinDesc = new JSpinner(new SpinnerNumberModel(descendentesPadrao[i % descendentesPadrao.length], 0, 20, 1));
+            JSpinner spinDesc = new JSpinner(
+                    new SpinnerNumberModel(descendentesPadrao[i % descendentesPadrao.length], 0, 20, 1));
             spinDesc.setPreferredSize(new Dimension(60, 28));
 
             JTextField campoNome = new JTextField("Jogador " + (i + 1), 10);

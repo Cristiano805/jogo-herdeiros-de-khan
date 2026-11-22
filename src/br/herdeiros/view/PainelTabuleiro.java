@@ -138,11 +138,24 @@ public class PainelTabuleiro extends JPanel implements ObservadorIF {
             String nome = IndicesEstado.nomeLocalidade(localCidade[c]);
             Point p = MapaCoordenadas.getCoordenadaTela(nome, largura, altura);
             if (p != null) {
-                g2d.setColor(new Color(255, 215, 0, 220));
-                g2d.fillRoundRect(p.x - 30, p.y + 20, 60, 20, 8, 8);
+                String texto = "Tesouros: " + tesourosCidade[c];
+                int larguraBox = 100;
+                int alturaBox = 22;
+                int x = p.x - larguraBox / 2;
+                int y = p.y + 20;
+
+                // Fundo dourado arredondado com sombra suave
+                g2d.setColor(new Color(40, 40, 40, 160));
+                g2d.fillRoundRect(x + 2, y + 2, larguraBox, alturaBox, 10, 10);
+
+                g2d.setColor(new Color(255, 215, 0, 240));
+                g2d.fillRoundRect(x, y, larguraBox, alturaBox, 10, 10);
+
+                g2d.setColor(new Color(120, 70, 0));
+                g2d.drawRoundRect(x, y, larguraBox, alturaBox, 10, 10);
+
                 g2d.setColor(Color.BLACK);
-                g2d.drawRoundRect(p.x - 30, p.y + 20, 60, 20, 8, 8);
-                g2d.drawString("Tes: " + tesourosCidade[c], p.x - 22, p.y + 35);
+                g2d.drawString(texto, x + 12, y + 16);
             }
         }
     }

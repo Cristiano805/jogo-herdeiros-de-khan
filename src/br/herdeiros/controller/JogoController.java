@@ -137,15 +137,9 @@ public class JogoController {
             if (cartas.size() < 2) {
                 continue;
             }
-            String[] opcoes = new String[cartas.size()];
-            for (int k = 0; k < opcoes.length; k++) {
-                opcoes[k] = "Carta " + (k + 1) + " (" + cartas.get(k) + ")";
-            }
-            int escolha = JOptionPane.showOptionDialog(null,
-                    p.getNomeJogadorPorIndice(i) + ": escolha qual carta será o seu CONSELHEIRO.\n"
-                            + "A outra carta será a sua CARTA SECRETA.",
-                    "Escolha do conselheiro e da carta secreta",
-                    JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, opcoes, opcoes[0]);
+            String nome = p.getNomeJogadorPorIndice(i);
+            String cor = getNomeCor(p.get(br.herdeiros.observer.IndicesEstado.jogador(i, br.herdeiros.observer.IndicesEstado.CAMPO_COR)));
+            int escolha = br.herdeiros.view.JanelaEscolhaConselheiro.escolher(null, nome, cor, cartas);
             p.escolherConselheiro(i, escolha < 0 ? 0 : escolha);
         }
     }

@@ -76,6 +76,112 @@ class Tabuleiro implements java.io.Serializable {
         conectar(kazan, samarcanda);
         conectar(xian, samarcanda);
         conectar(cantao, tabriz);
+
+        // --- 46 PARADAS / BOLINHAS DO TABULEIRO ---
+        conectar(karakorum, "CENTRO_53");
+        conectar(karakorum, "RUSSIA_18");
+        conectar(karakorum, "RUSSIA_16");
+        conectar(karakorum, "PERSIA_27");
+        conectar(karakorum, "CHINA_38");
+        conectar(karakorum, "CHINA_52");
+        conectar("CENTRO_53", "RUSSIA_18");
+        conectar("CENTRO_53", "RUSSIA_16");
+        conectar("CENTRO_53", "PERSIA_27");
+        conectar("CENTRO_53", "CHINA_38");
+        conectar("CENTRO_53", "CHINA_52");
+
+        // Malha da Rússia
+        conectar("RUSSIA_16", "RUSSIA_2");
+        conectar("RUSSIA_2", "RUSSIA_1");
+        conectar("RUSSIA_1", "CONSELHEIRO_59");
+        conectar("CONSELHEIRO_59", "RUSSIA_17");
+        conectar("RUSSIA_17", "RUSSIA_16");
+        conectar("RUSSIA_17", "RUSSIA_18");
+        conectar("RUSSIA_18", "RUSSIA_19");
+        conectar("RUSSIA_19", "RUSSIA_17");
+        conectar("RUSSIA_2", "RUSSIA_3");
+        conectar("RUSSIA_3", "RUSSIA_15");
+        conectar("RUSSIA_15", "CONSELHEIRO_58");
+        conectar("CONSELHEIRO_58", "CHINA_48");
+        conectar("RUSSIA_20", "RUSSIA_21");
+        conectar("RUSSIA_21", "RUSSIA_22");
+        conectar("RUSSIA_22", "RUSSIA_24");
+        conectar("RUSSIA_24", "RUSSIA_23");
+        conectar("RUSSIA_24", "RUSSIA_19");
+        conectar("RUSSIA_20", "RUSSIA_17");
+        conectar("RUSSIA_24", "PERSIA_25");
+
+        // Malha da Pérsia
+        conectar("PERSIA_27", "PERSIA_34");
+        conectar("PERSIA_34", "PERSIA_26");
+        conectar("PERSIA_26", "PERSIA_25");
+        conectar("PERSIA_25", "CONSELHEIRO_57");
+        conectar("PERSIA_27", "PERSIA_28");
+        conectar("PERSIA_28", "PERSIA_29");
+        conectar("PERSIA_29", "PERSIA_30");
+        conectar("PERSIA_30", "CONSELHEIRO_56");
+        conectar("CONSELHEIRO_56", "CHINA_40");
+        conectar("PERSIA_29", "PERSIA_31");
+        conectar("PERSIA_30", "PERSIA_31");
+        conectar("PERSIA_28", "PERSIA_32");
+        conectar("PERSIA_32", "PERSIA_33");
+        conectar("PERSIA_33", "CONSELHEIRO_60");
+        conectar("PERSIA_32", "CONSELHEIRO_60");
+        conectar("PERSIA_34", "PERSIA_35");
+        conectar("PERSIA_35", "PERSIA_36");
+        conectar("PERSIA_36", "PERSIA_37");
+        conectar("PERSIA_37", "PERSIA_33");
+        conectar("PERSIA_37", "PERSIA_34");
+
+        // Malha da China
+        conectar("CHINA_38", "CHINA_39");
+        conectar("CHINA_39", "CHINA_52");
+        conectar("CHINA_39", "CHINA_45");
+        conectar("CHINA_45", "CHINA_46");
+        conectar("CHINA_46", "CONSELHEIRO_55");
+        conectar("CHINA_45", "CONSELHEIRO_55");
+        conectar("CHINA_46", "CHINA_47");
+        conectar("CHINA_47", "CHINA_48");
+        conectar("CHINA_47", "CHINA_49");
+        conectar("CHINA_48", "CHINA_49");
+        conectar("CHINA_39", "CHINA_44");
+        conectar("CHINA_44", "CHINA_42");
+        conectar("CHINA_42", "CHINA_41");
+        conectar("CHINA_41", "CHINA_40");
+        conectar("CHINA_44", "CHINA_43");
+        conectar("CHINA_43", "CHINA_42");
+
+        // Conectar paradas às cidades adjacentes
+        conectar(moscou, "RUSSIA_17");
+        conectar(moscou, "RUSSIA_19");
+        conectar(moscou, "RUSSIA_16");
+        conectar(kazan, "RUSSIA_2");
+        conectar(kazan, "RUSSIA_16");
+        conectar(kazan, "RUSSIA_1");
+        conectar(novgorod, "RUSSIA_22");
+        conectar(novgorod, "RUSSIA_23");
+        conectar(novgorod, "RUSSIA_24");
+
+        conectar(pequim, "CHINA_39");
+        conectar(pequim, "CHINA_45");
+        conectar(pequim, "CHINA_46");
+        conectar(pequim, "CHINA_52");
+        conectar(cantao, "CHINA_43");
+        conectar(cantao, "CHINA_44");
+        conectar(cantao, "CHINA_42");
+        conectar(xian, "CHINA_47");
+        conectar(xian, "CHINA_48");
+        conectar(xian, "CHINA_49");
+
+        conectar(samarcanda, "PERSIA_27");
+        conectar(samarcanda, "PERSIA_28");
+        conectar(samarcanda, "PERSIA_34");
+        conectar(bagda, "PERSIA_35");
+        conectar(bagda, "PERSIA_36");
+        conectar(bagda, "PERSIA_37");
+        conectar(tabriz, "PERSIA_30");
+        conectar(tabriz, "PERSIA_31");
+        conectar(tabriz, "PERSIA_32");
     }
 
     private void conectar(String loc1, String loc2) {

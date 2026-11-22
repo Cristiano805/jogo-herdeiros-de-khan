@@ -213,9 +213,20 @@ public class Partida implements ObservadoIF {
 
     public boolean saquearCidadeNaLocalizacaoAtual() {
         String loc = getLocalizacaoJogadorAtual();
+        if (loc == null) return false;
+        // 1. Caso o jogador esteja diretamente na cidade:
         for (NomeCidade nc : NomeCidade.values()) {
             if (nc.getNomeFormatado().equalsIgnoreCase(loc)) {
                 return saquearCidade(nc);
+            }
+        }
+        // 2. Ou caso esteja em uma parada/bolinha adjacente à cidade no mapa:
+        Set<String> vizinhos = this.tabuleiro.getVizinhos(loc);
+        if (vizinhos != null) {
+            for (NomeCidade nc : NomeCidade.values()) {
+                if (vizinhos.contains(nc.getNomeFormatado())) {
+                    return saquearCidade(nc);
+                }
             }
         }
         return false;

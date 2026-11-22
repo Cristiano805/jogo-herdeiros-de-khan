@@ -17,7 +17,25 @@ public final class IndicesEstado {
     public static final String[] LOCALIDADES = {
         "Karakorum", "Moscou", "Kazan", "Novgorod",
         "Pequim", "Cantão", "Xi'an",
-        "Samarcanda", "Bagdá", "Tabriz"
+        "Samarcanda", "Bagdá", "Tabriz",
+
+        // 46 paradas/bolinhas mapeadas do mapa
+        "RUSSIA_1", "RUSSIA_2", "RUSSIA_3", "RUSSIA_15", "RUSSIA_16",
+        "RUSSIA_17", "RUSSIA_18", "RUSSIA_19", "RUSSIA_20", "RUSSIA_21",
+        "RUSSIA_22", "RUSSIA_23", "RUSSIA_24",
+
+        "PERSIA_25", "PERSIA_26", "PERSIA_27", "PERSIA_28", "PERSIA_29",
+        "PERSIA_30", "PERSIA_31", "PERSIA_32", "PERSIA_33", "PERSIA_34",
+        "PERSIA_35", "PERSIA_36", "PERSIA_37",
+
+        "CHINA_38", "CHINA_39", "CHINA_40", "CHINA_41", "CHINA_42",
+        "CHINA_43", "CHINA_44", "CHINA_45", "CHINA_46", "CHINA_47",
+        "CHINA_48", "CHINA_49", "CHINA_52",
+
+        "CENTRO_53",
+
+        "CONSELHEIRO_55", "CONSELHEIRO_56", "CONSELHEIRO_57",
+        "CONSELHEIRO_58", "CONSELHEIRO_59", "CONSELHEIRO_60"
     };
 
     // --- Estado global da partida ---

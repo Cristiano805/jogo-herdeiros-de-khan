@@ -128,7 +128,7 @@ public class JanelaCartelas extends JFrame implements ObservadorIF {
             cor = ctrl.getNomeCor(o.get(IndicesEstado.jogador(vez, IndicesEstado.CAMPO_COR)));
         }
         lblJogador.setText("Tabuleiro / Cartela de: " + nome + " (" + cor + ")");
-        painelExibicao.setJogadorAtual(nome, cor);
+        painelExibicao.setJogadorAtual(vez >= 0 ? ctrl.getHerdeiro(vez) : null, cor);
 
         boolean exibir = o.get(IndicesEstado.EXIBIR_CARTELA) == 1;
         if (exibir && !isVisible()) {

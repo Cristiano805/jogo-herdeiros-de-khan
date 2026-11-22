@@ -28,6 +28,7 @@ public final class IndicesEstado {
     public static final int EXIBIR_CARTAS = 4;         // 1 = janela de cartas deve estar visível
     public static final int EXIBIR_INVENTARIO = 5;     // 1 = janela de inventário deve estar visível
     public static final int LOCALIDADE_KHAN = 6;
+    public static final int PARTIDA_ENCERRADA = 7;     // 1 = partida terminou
 
     // --- Estado por jogador: JOGADOR_BASE + j * JOGADOR_PASSO + campo ---
     public static final int JOGADOR_BASE = 100;
@@ -42,6 +43,8 @@ public final class IndicesEstado {
     public static final int CAMPO_QTD_CARTAS = 7;
     public static final int CAMPO_CARTA_0 = 8;          // cartas k em CAMPO_CARTA_0 + k
     public static final int MAX_CARTAS = 20;
+    public static final int CAMPO_CONSELHEIRO = 28;     // código da carta de conselheiro (-1 = não escolhido)
+    public static final int CAMPO_SECRETA = 29;         // código da carta secreta (-1 = não escolhida)
 
     // --- Estado por cidade: CIDADE_BASE + ordinalCidade * CIDADE_PASSO + campo ---
     public static final int CIDADE_BASE = 1000;

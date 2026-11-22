@@ -6,7 +6,9 @@ import br.herdeiros.view.JanelaEscolhaPersonagens;
 import br.herdeiros.view.JanelaMenuInicial;
 import br.herdeiros.view.JanelaPrincipal;
 
+import java.io.File;
 import java.util.List;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
 /**
@@ -15,15 +17,15 @@ import javax.swing.JOptionPane;
  * Único responsável por organizar a sequência de eventos da partida:
  * menu inicial -> escolha de personagens -> partida (ou carregar jogo salvo).
  * A View aciona as regras chamando JogoController.getInstance().xxx(), e o
- * Controller
- * repassa para a fachada do Model (Partida.getInstance()). As Views se
- * registram como
- * observadoras do Model exclusivamente através de
+ * Controller repassa para a fachada do Model (Partida.getInstance()). As Views
+ * se registram como observadoras do Model exclusivamente através de
  * {@link #registra(ObservadorIF)}.
  *
  * SEM uso de expressões lambda em listeners (regra obrigatória da disciplina).
  */
 public class JogoController {
+
+    private static final String ARQUIVO_PADRAO = "herdeiros_save.dat";
 
     private static JogoController instancia;
 
@@ -76,10 +78,21 @@ public class JogoController {
 
             @Override
             public void aoContinuarJogoSalvo() {
-                JOptionPane.showMessageDialog(
-                        refMenu[0],
-                        "No futuro colocaremos essa funcao",
-                        JOptionPane.INFORMATION_MESSAGE);
+                JFileChooser chooser = new JFileChooser(new File("."));
+                chooser.setDialogTitle("Carregar partida salva");
+                chooser.setSelectedFile(new File(ARQUIVO_PADRAO));
+                if (chooser.showOpenDialog(refMenu[0]) != JFileChooser.APPROVE_OPTION) {
+                    return;
+                }
+                if (model().carregar(chooser.getSelectedFile().getAbsolutePath())) {
+                    refMenu[0].dispose();
+                    abrirJanelaPrincipal();
+                    verificarFim();
+                } else {
+                    JOptionPane.showMessageDialog(refMenu[0],
+                            "Não foi possível carregar o arquivo selecionado.",
+                            "Carregar Jogo", JOptionPane.ERROR_MESSAGE);
+                }
             }
         });
         refMenu[0].exibir();
@@ -108,10 +121,33 @@ public class JogoController {
         p.reiniciar();
         for (JanelaEscolhaPersonagens.DadosJogadorConfig cfg : configs) {
             p.adicionarJogador(cfg.nome, cfg.cor, cfg.descendentes);
+            p.definirHerdeiro(cfg.cor, cfg.herdeiro);
         }
         // Regra oficial: o jogador com o maior número de descendentes começa
         p.definirPrimeiroJogadorPorDescendentes();
+        escolherConselheiros();
         abrirJanelaPrincipal();
+    }
+
+    /** Cada jogador escolhe qual das suas cartas é o conselheiro; a outra é a carta secreta. */
+    private void escolherConselheiros() {
+        Partida p = model();
+        for (int i = 0; i < p.get(br.herdeiros.observer.IndicesEstado.QTD_JOGADORES); i++) {
+            List<String> cartas = p.getCartasJogadorPorIndice(i);
+            if (cartas.size() < 2) {
+                continue;
+            }
+            String[] opcoes = new String[cartas.size()];
+            for (int k = 0; k < opcoes.length; k++) {
+                opcoes[k] = "Carta " + (k + 1) + " (" + cartas.get(k) + ")";
+            }
+            int escolha = JOptionPane.showOptionDialog(null,
+                    p.getNomeJogadorPorIndice(i) + ": escolha qual carta será o seu CONSELHEIRO.\n"
+                            + "A outra carta será a sua CARTA SECRETA.",
+                    "Escolha do conselheiro e da carta secreta",
+                    JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, opcoes, opcoes[0]);
+            p.escolherConselheiro(i, escolha < 0 ? 0 : escolha);
+        }
     }
 
     private void abrirJanelaPrincipal() {
@@ -155,7 +191,9 @@ public class JogoController {
     }
 
     public boolean saquearCidade() {
-        return model().saquearCidadeNaLocalizacaoAtual();
+        boolean ok = model().saquearCidadeNaLocalizacaoAtual();
+        verificarFim();
+        return ok;
     }
 
     public void coletarTributo(int indiceTipo, int quantidade) {
@@ -187,11 +225,47 @@ public class JogoController {
     }
 
     // ------------------------------------------------------------------
+    // Salvamento e fim de partida
+    // ------------------------------------------------------------------
+
+    /** Pergunta o arquivo e salva a partida atual. */
+    public void salvarPartida() {
+        JFileChooser chooser = new JFileChooser(new File("."));
+        chooser.setDialogTitle("Salvar partida");
+        chooser.setSelectedFile(new File(ARQUIVO_PADRAO));
+        if (chooser.showSaveDialog(janelaPrincipal) != JFileChooser.APPROVE_OPTION) {
+            return;
+        }
+        boolean ok = model().salvar(chooser.getSelectedFile().getAbsolutePath());
+        JOptionPane.showMessageDialog(janelaPrincipal,
+                ok ? "Partida salva com sucesso." : "Erro ao salvar a partida.",
+                "Salvar Partida",
+                ok ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.ERROR_MESSAGE);
+    }
+
+    /** Encerra a partida por decisão dos jogadores e mostra o vencedor. */
+    public void encerrarPartida() {
+        model().encerrarPartida();
+        verificarFim();
+    }
+
+    private void verificarFim() {
+        if (model().isPartidaEncerrada()) {
+            JOptionPane.showMessageDialog(janelaPrincipal, model().getResumoFinal(),
+                    "Fim da partida - Herdeiros de Khan", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+
+    // ------------------------------------------------------------------
     // Dados textuais (nomes) - a View não acessa o Model diretamente
     // ------------------------------------------------------------------
 
     public String getNomeJogador(int indiceJogador) {
         return model().getNomeJogadorPorIndice(indiceJogador);
+    }
+
+    public String getHerdeiro(int indiceJogador) {
+        return model().getHerdeiroPorIndice(indiceJogador);
     }
 
     public String getNomeCor(int ordinalCor) {

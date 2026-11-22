@@ -98,7 +98,14 @@ public class JanelaCartas extends JFrame implements ObservadorIF {
         if (vez >= 0) {
             String nome = ctrl.getNomeJogador(vez);
             String cor = ctrl.getNomeCor(o.get(IndicesEstado.jogador(vez, IndicesEstado.CAMPO_COR)));
-            lblJogador.setText("Cartas Secretas de: " + nome + " (" + cor + ")");
+            int cons = o.get(IndicesEstado.jogador(vez, IndicesEstado.CAMPO_CONSELHEIRO));
+            int secr = o.get(IndicesEstado.jogador(vez, IndicesEstado.CAMPO_SECRETA));
+            String detalhe = "";
+            if (cons >= 0) {
+                detalhe = " | Conselheiro: " + IndicesEstado.decodificarCarta(cons)
+                        + " | Carta secreta: " + (secr >= 0 ? IndicesEstado.decodificarCarta(secr) : "-");
+            }
+            lblJogador.setText("Cartas Secretas de: " + nome + " (" + cor + ")" + detalhe);
             int qtd = o.get(IndicesEstado.jogador(vez, IndicesEstado.CAMPO_QTD_CARTAS));
             for (int k = 0; k < qtd; k++) {
                 int codigo = o.get(IndicesEstado.jogador(vez, IndicesEstado.CAMPO_CARTA_0 + k));

@@ -33,11 +33,13 @@ public class JanelaEscolhaPersonagens extends JFrame {
 
     public static class DadosJogadorConfig {
         public String nome;
+        public String herdeiro; // herdeiro oficial escolhido (define a cartela exibida)
         public String cor; // nome da cor (resolvido pelo Controller); a View nao conhece o enum do Model
         public int descendentes;
 
-        public DadosJogadorConfig(String nome, String cor, int descendentes) {
+        public DadosJogadorConfig(String nome, String herdeiro, String cor, int descendentes) {
             this.nome = nome;
+            this.herdeiro = herdeiro;
             this.cor = cor;
             this.descendentes = descendentes;
         }
@@ -54,6 +56,7 @@ public class JanelaEscolhaPersonagens extends JFrame {
     private List<LinhaJogador> linhasJogadores;
 
     private static class LinhaJogador {
+        JTextField campoNome;
         JComboBox<String> comboNomeHerdeiro;
         JComboBox<String> comboCor;
         JSpinner spinnerDescendentes;
@@ -209,6 +212,11 @@ public class JanelaEscolhaPersonagens extends JFrame {
             JSpinner spinDesc = new JSpinner(new SpinnerNumberModel(descendentesPadrao[i % descendentesPadrao.length], 0, 20, 1));
             spinDesc.setPreferredSize(new Dimension(60, 28));
 
+            JTextField campoNome = new JTextField("Jogador " + (i + 1), 10);
+            campoNome.setPreferredSize(new Dimension(90, 28));
+
+            cardJogador.add(new JLabel("Nome:"));
+            cardJogador.add(campoNome);
             cardJogador.add(new JLabel("Herdeiro:"));
             cardJogador.add(comboHerdeiro);
             cardJogador.add(new JLabel("Cor do Peão:"));
@@ -217,6 +225,7 @@ public class JanelaEscolhaPersonagens extends JFrame {
             cardJogador.add(spinDesc);
 
             LinhaJogador linha = new LinhaJogador();
+            linha.campoNome = campoNome;
             linha.comboNomeHerdeiro = comboHerdeiro;
             linha.comboCor = comboCor;
             linha.spinnerDescendentes = spinDesc;
@@ -237,6 +246,10 @@ public class JanelaEscolhaPersonagens extends JFrame {
         for (int i = 0; i < linhasJogadores.size(); i++) {
             LinhaJogador linha = linhasJogadores.get(i);
             String nome = (String) linha.comboNomeHerdeiro.getSelectedItem();
+            String nomeJogador = linha.campoNome.getText().trim();
+            if (nomeJogador.isEmpty()) {
+                nomeJogador = "Jogador " + (i + 1);
+            }
             if (herdeirosEscolhidos.contains(nome)) {
                 JOptionPane.showMessageDialog(this,
                         "Cada participante deve escolher um herdeiro diferente. Herdeiro repetido: " + nome,
@@ -255,7 +268,7 @@ public class JanelaEscolhaPersonagens extends JFrame {
             coresEscolhidas.add(cor);
 
             int desc = (Integer) linha.spinnerDescendentes.getValue();
-            listaFinal.add(new DadosJogadorConfig(nome, cor, desc));
+            listaFinal.add(new DadosJogadorConfig(nomeJogador, nome, cor, desc));
         }
 
         if (ouvinte != null) {

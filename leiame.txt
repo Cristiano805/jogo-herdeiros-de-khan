@@ -1,0 +1,16 @@
+======================================================================
+PROJETO: Jogo Herdeiros de Khan
+DISCIPLINA: INF1636 - Programação Orientada a Objetos (PUC-Rio)
+======================================================================
+
+COMPONENTES DO GRUPO:
+1. Nome: Cristiano Ferreira De Mattos
+   Matrícula: 2320397
+
+2. Nome: Felipe Eduardo Nunes Silva
+   Matrícula: 2320615
+
+----------------------------------------------------------------------
+CLASSE QUE CONTÉM O MÉTODO MAIN:
+br.herdeiros.Main
+======================================================================

@@ -82,6 +82,25 @@ public class PainelControle extends JPanel {
         });
         add(btnVerInventario);
 
+        // 2.2 Salvar partida e encerrar partida (apuração do vencedor)
+        JButton btnSalvar = criarBotao("Salvar Partida", new Color(41, 128, 185), 32, 12);
+        btnSalvar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JogoController.getInstance().salvarPartida();
+            }
+        });
+        add(btnSalvar);
+
+        JButton btnEncerrarPartida = criarBotao("Encerrar Partida (Vencedor)", new Color(192, 57, 43), 32, 12);
+        btnEncerrarPartida.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JogoController.getInstance().encerrarPartida();
+            }
+        });
+        add(btnEncerrarPartida);
+
         // 3. Ações de regra na localização atual do jogador da vez
         JPanel painelAcoes = new JPanel();
         painelAcoes.setPreferredSize(new Dimension(260, 120));

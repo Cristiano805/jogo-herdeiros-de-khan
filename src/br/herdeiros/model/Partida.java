@@ -31,6 +31,7 @@ public class Partida implements ObservadoIF {
     private BaralhoDeCidades baralho;
     private Jogador jogadorAtual;
     private int movimentosRestantes;
+    private boolean partidaEncerrada;
 
     // Estado de exibição das janelas (refletido nas Views via Observer)
     private boolean exibirCartela;
@@ -63,6 +64,7 @@ public class Partida implements ObservadoIF {
         this.exibirCartela = false;
         this.exibirCartas = false;
         this.exibirInventario = false;
+        this.partidaEncerrada = false;
     }
 
     /** Reinicia a partida mantendo os observadores registrados. */
@@ -102,6 +104,7 @@ public class Partida implements ObservadoIF {
             case IndicesEstado.EXIBIR_CARTAS: return exibirCartas ? 1 : 0;
             case IndicesEstado.EXIBIR_INVENTARIO: return exibirInventario ? 1 : 0;
             case IndicesEstado.LOCALIDADE_KHAN: return IndicesEstado.indiceLocalidade(getLocalizacaoKhan());
+            case IndicesEstado.PARTIDA_ENCERRADA: return partidaEncerrada ? 1 : 0;
             default: break;
         }
         if (i >= IndicesEstado.YURT_BASE) {
@@ -135,6 +138,10 @@ public class Partida implements ObservadoIF {
                 case IndicesEstado.CAMPO_MOEDAS: return j.getQuantidadeTributo(TipoTributo.MOEDA);
                 case IndicesEstado.CAMPO_DESCENDENTES: return j.getQuantidadeDescendentes();
                 case IndicesEstado.CAMPO_QTD_CARTAS: return Math.min(j.getCartas().size(), IndicesEstado.MAX_CARTAS);
+                case IndicesEstado.CAMPO_CONSELHEIRO:
+                    return j.getConselheiro() == null ? -1 : IndicesEstado.codificarCarta(j.getConselheiro());
+                case IndicesEstado.CAMPO_SECRETA:
+                    return j.getCartaSecreta() == null ? -1 : IndicesEstado.codificarCarta(j.getCartaSecreta());
                 default:
                     int k = campo - IndicesEstado.CAMPO_CARTA_0;
                     if (k >= 0 && k < j.getCartas().size()) {
@@ -179,7 +186,7 @@ public class Partida implements ObservadoIF {
      * @return true se o movimento foi realizado.
      */
     public boolean moverJogadorDaVez(String destino) {
-        if (this.jogadorAtual == null || destino == null || movimentosRestantes <= 0) {
+        if (partidaEncerrada || this.jogadorAtual == null || destino == null || movimentosRestantes <= 0) {
             return false;
         }
         String origem = getLocalizacaoJogadorAtual();
@@ -354,7 +361,7 @@ public class Partida implements ObservadoIF {
      * Constrói um assentamento (Yurt) na localização informada, gastando 1 tributo de Yurt do jogador atual.
      */
     public boolean construirYurtJogadorAtual(String localizacao) {
-        if (this.jogadorAtual == null || localizacao == null) {
+        if (partidaEncerrada || this.jogadorAtual == null || localizacao == null) {
             return false;
         }
         if (this.jogadorAtual.getQuantidadeTributo(TipoTributo.YURT) < 1) {
@@ -387,7 +394,7 @@ public class Partida implements ObservadoIF {
      * concede +2 votos bônus e saca uma nova cidade do baralho para substituir no tabuleiro.
      */
     public boolean saquearCidade(NomeCidade nomeCidade) {
-        if (this.jogadorAtual == null || nomeCidade == null) {
+        if (partidaEncerrada || this.jogadorAtual == null || nomeCidade == null) {
             return false;
         }
         Cidade cidade = this.tabuleiro.getCidade(nomeCidade);
@@ -408,6 +415,10 @@ public class Partida implements ObservadoIF {
                 this.jogadorAtual.ganharVotos(2); // bônus de conquista
                 Cidade novaCidade = this.baralho.sacarCidadeDoTopo();
                 this.tabuleiro.substituirCidadeConquistada(cidade, novaCidade);
+                // Baralho de cidades esgotado: a partida termina
+                if (novaCidade == null) {
+                    this.partidaEncerrada = true;
+                }
             }
             notificarObservadores();
             return true;
@@ -537,6 +548,145 @@ public class Partida implements ObservadoIF {
 
     Jogador getJogadorAtual() {
         return jogadorAtual;
+    }
+
+    // --- Fim de partida ---
+
+    public boolean isPartidaEncerrada() {
+        return partidaEncerrada;
+    }
+
+    /** Encerra a partida (apuração final dos votos do Kurultai). */
+    public void encerrarPartida() {
+        if (!partidaEncerrada && !jogadores.isEmpty()) {
+            partidaEncerrada = true;
+            notificarObservadores();
+        }
+    }
+
+    private List<Jogador> rankingFinal() {
+        List<Jogador> ranking = new ArrayList<Jogador>(jogadores.values());
+        Collections.sort(ranking, new java.util.Comparator<Jogador>() {
+            @Override
+            public int compare(Jogador a, Jogador b) {
+                if (a.getVotosKurultai() != b.getVotosKurultai()) {
+                    return b.getVotosKurultai() - a.getVotosKurultai();
+                }
+                return b.getQuantidadeDescendentes() - a.getQuantidadeDescendentes();
+            }
+        });
+        return ranking;
+    }
+
+    public String getNomeVencedor() {
+        List<Jogador> ranking = rankingFinal();
+        return ranking.isEmpty() ? null : ranking.get(0).getNome();
+    }
+
+    /** Texto com o ranking final e a indicação do vencedor. */
+    public String getResumoFinal() {
+        List<Jogador> ranking = rankingFinal();
+        if (ranking.isEmpty()) {
+            return "Nenhum jogador na partida.";
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append("VENCEDOR: ").append(ranking.get(0).getNome())
+          .append(" (").append(ranking.get(0).getCor().name()).append(")\n\n");
+        sb.append("Ranking final (votos no Kurultai):\n");
+        int pos = 1;
+        for (Jogador j : ranking) {
+            sb.append(pos++).append("º - ").append(j.getNome())
+              .append(" (").append(j.getCor().name()).append(") - ")
+              .append(j.getVotosKurultai()).append(" votos\n");
+        }
+        return sb.toString();
+    }
+
+    // --- Herdeiro, conselheiro e carta secreta ---
+
+    public void definirHerdeiro(String nomeCor, String herdeiro) {
+        try {
+            Jogador j = jogadores.get(Cor.valueOf(nomeCor));
+            if (j != null) {
+                j.setHerdeiro(herdeiro);
+                notificarObservadores();
+            }
+        } catch (IllegalArgumentException | NullPointerException e) {
+            // cor inválida: ignorada
+        }
+    }
+
+    public String getHerdeiroPorIndice(int indice) {
+        if (indice < 0 || indice >= ordemTurnos.size()) return null;
+        return jogadores.get(ordemTurnos.get(indice)).getHerdeiro();
+    }
+
+    public List<String> getCartasJogadorPorIndice(int indice) {
+        if (indice < 0 || indice >= ordemTurnos.size()) return Collections.emptyList();
+        return jogadores.get(ordemTurnos.get(indice)).getCartas();
+    }
+
+    /** Escolhe qual carta do jogador é o conselheiro; a outra vira a carta secreta. */
+    public boolean escolherConselheiro(int indiceJogador, int indiceCarta) {
+        if (indiceJogador < 0 || indiceJogador >= ordemTurnos.size()) return false;
+        boolean ok = jogadores.get(ordemTurnos.get(indiceJogador)).escolherConselheiro(indiceCarta);
+        if (ok) notificarObservadores();
+        return ok;
+    }
+
+    // --- Salvamento e recuperação da partida (serialização) ---
+
+    private static class Estado implements java.io.Serializable {
+        private static final long serialVersionUID = 1L;
+        Map<Cor, Jogador> jogadores;
+        List<Cor> ordemTurnos;
+        int indiceTurnoAtual;
+        Tabuleiro tabuleiro;
+        BaralhoDeCidades baralho;
+        Jogador jogadorAtual;
+        int movimentosRestantes;
+        boolean partidaEncerrada;
+    }
+
+    public boolean salvar(String caminho) {
+        if (caminho == null) return false;
+        Estado e = new Estado();
+        e.jogadores = new HashMap<Cor, Jogador>(jogadores);
+        e.ordemTurnos = new ArrayList<Cor>(ordemTurnos);
+        e.indiceTurnoAtual = indiceTurnoAtual;
+        e.tabuleiro = tabuleiro;
+        e.baralho = baralho;
+        e.jogadorAtual = jogadorAtual;
+        e.movimentosRestantes = movimentosRestantes;
+        e.partidaEncerrada = partidaEncerrada;
+        try (java.io.ObjectOutputStream out = new java.io.ObjectOutputStream(new java.io.FileOutputStream(caminho))) {
+            out.writeObject(e);
+            return true;
+        } catch (java.io.IOException ex) {
+            return false;
+        }
+    }
+
+    public boolean carregar(String caminho) {
+        if (caminho == null) return false;
+        try (java.io.ObjectInputStream in = new java.io.ObjectInputStream(new java.io.FileInputStream(caminho))) {
+            Estado e = (Estado) in.readObject();
+            this.jogadores = e.jogadores;
+            this.ordemTurnos = e.ordemTurnos;
+            this.indiceTurnoAtual = e.indiceTurnoAtual;
+            this.tabuleiro = e.tabuleiro;
+            this.baralho = e.baralho;
+            this.jogadorAtual = e.jogadorAtual;
+            this.movimentosRestantes = e.movimentosRestantes;
+            this.partidaEncerrada = e.partidaEncerrada;
+            this.exibirCartela = false;
+            this.exibirCartas = false;
+            this.exibirInventario = false;
+            notificarObservadores();
+            return true;
+        } catch (java.io.IOException | ClassNotFoundException | ClassCastException ex) {
+            return false;
+        }
     }
 
     public void definirJogadorAtual(Jogador jogador) {

@@ -5,7 +5,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-class Jogador {
+class Jogador implements java.io.Serializable {
+    private static final long serialVersionUID = 1L;
+    private String herdeiro;
+    private String conselheiro;
+    private String cartaSecreta;
+
     private String nome;
     private Cor cor;
     private Peao meuPeao;
@@ -72,6 +77,38 @@ class Jogador {
         return Collections.unmodifiableMap(tributos);
     }
     
+    public String getHerdeiro() {
+        return herdeiro;
+    }
+
+    public void setHerdeiro(String herdeiro) {
+        this.herdeiro = herdeiro;
+    }
+
+    public String getConselheiro() {
+        return conselheiro;
+    }
+
+    public String getCartaSecreta() {
+        return cartaSecreta;
+    }
+
+    /** Define qual das cartas em posse é o conselheiro; a outra passa a ser a carta secreta. */
+    public boolean escolherConselheiro(int indiceCarta) {
+        if (indiceCarta < 0 || indiceCarta >= cartas.size()) {
+            return false;
+        }
+        this.conselheiro = cartas.get(indiceCarta);
+        this.cartaSecreta = null;
+        for (int i = 0; i < cartas.size(); i++) {
+            if (i != indiceCarta) {
+                this.cartaSecreta = cartas.get(i);
+                break;
+            }
+        }
+        return true;
+    }
+
     public String getNome() {
         return nome;
     }

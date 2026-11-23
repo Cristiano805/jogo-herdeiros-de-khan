@@ -15,6 +15,5 @@ CLASSE QUE CONTÉM O MÉTODO MAIN:
 br.herdeiros.Main
 
 ----------------------------------------------------------------------
-LINK DO VÍDEO DE APRESENTAÇÃO (Google Drive ou Dropbox):
-[COLE_AQUI_O_LINK_DO_VIDEO]
+https://drive.google.com/drive/folders/1xxy_J0qu-poFEoWSVvUM_88fHMikiXk8?usp=drive_link
 ======================================================================

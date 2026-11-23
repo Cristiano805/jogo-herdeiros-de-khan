@@ -68,6 +68,28 @@ class Jogador implements java.io.Serializable {
         return true;
     }
 
+    public void setVotosKurultai(int votos) {
+        this.votosKurultai = Math.max(0, votos);
+    }
+
+    public void setConselheiro(String conselheiro) {
+        this.conselheiro = conselheiro;
+    }
+
+    public void setCartaSecreta(String cartaSecreta) {
+        this.cartaSecreta = cartaSecreta;
+    }
+
+    public void definirTributoDireto(TipoTributo tipo, int quantidade) {
+        if (tipo != null) {
+            this.tributos.put(tipo, Math.max(0, quantidade));
+        }
+    }
+
+    public void limparCartas() {
+        this.cartas.clear();
+    }
+
     public int getQuantidadeTributo(TipoTributo tipo) {
         if (tipo == null) return 0;
         return this.tributos.getOrDefault(tipo, 0);
@@ -113,12 +135,20 @@ class Jogador implements java.io.Serializable {
         return nome;
     }
 
+    public void setNome(String nome) {
+        this.nome = nome != null ? nome : "";
+    }
+
     public Cor getCor() {
         return cor;
     }
 
     public int getQuantidadeDescendentes() {
         return quantidadeDescendentes;
+    }
+
+    public void setQuantidadeDescendentes(int quantidadeDescendentes) {
+        this.quantidadeDescendentes = Math.max(0, quantidadeDescendentes);
     }
 
     public int getVotosKurultai() {

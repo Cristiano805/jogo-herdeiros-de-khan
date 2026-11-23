@@ -34,6 +34,14 @@ class BaralhoDeCidades implements java.io.Serializable {
         this.pilha.push(new Cidade(NomeCidade.TABRIZ, Regiao.PERSIA));        
     }
     
+    public Deque<Cidade> getPilha() {
+        return pilha;
+    }
+
+    public void setPilha(Deque<Cidade> novaPilha) {
+        this.pilha = novaPilha != null ? novaPilha : new ArrayDeque<Cidade>();
+    }
+
     public Cidade sacarCidadeDoTopo() {
         if (this.pilha.isEmpty()) {
             return null;

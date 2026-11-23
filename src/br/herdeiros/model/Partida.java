@@ -32,6 +32,7 @@ public class Partida implements ObservadoIF {
     private Jogador jogadorAtual;
     private int movimentosRestantes;
     private boolean partidaEncerrada;
+    private boolean podeSalvar;
 
     // Estado de exibição das janelas (refletido nas Views via Observer)
     private boolean exibirCartela;
@@ -65,6 +66,7 @@ public class Partida implements ObservadoIF {
         this.exibirCartas = false;
         this.exibirInventario = false;
         this.partidaEncerrada = false;
+        this.podeSalvar = true;
     }
 
     /** Reinicia a partida mantendo os observadores registrados. */
@@ -105,6 +107,7 @@ public class Partida implements ObservadoIF {
             case IndicesEstado.EXIBIR_INVENTARIO: return exibirInventario ? 1 : 0;
             case IndicesEstado.LOCALIDADE_KHAN: return IndicesEstado.indiceLocalidade(getLocalizacaoKhan());
             case IndicesEstado.PARTIDA_ENCERRADA: return partidaEncerrada ? 1 : 0;
+            case IndicesEstado.PODE_SALVAR: return podeSalvar ? 1 : 0;
             default: break;
         }
         if (i >= IndicesEstado.YURT_BASE) {
@@ -178,6 +181,7 @@ public class Partida implements ObservadoIF {
 
     public void definirMovimentos(int quantidade) {
         this.movimentosRestantes = Math.max(0, quantidade);
+        this.podeSalvar = false;
         notificarObservadores();
     }
 
@@ -324,6 +328,7 @@ public class Partida implements ObservadoIF {
             this.jogadorAtual.getMeuPeao().iniciarTurno();
         }
         this.movimentosRestantes = 0;
+        this.podeSalvar = true;
         // Ao trocar de jogador, janelas privadas (cartela/cartas/inventário) passam a mostrar o novo jogador
         notificarObservadores();
         return proximaCor;
@@ -344,6 +349,7 @@ public class Partida implements ObservadoIF {
         }
         int dist = this.tabuleiro.calcularDistancia(origem, destino);
         if (dist > 0) {
+            this.podeSalvar = false;
             this.jogadorAtual.getMeuPeao().mover(destino);
             notificarObservadores();
             return true;
@@ -380,6 +386,7 @@ public class Partida implements ObservadoIF {
         }
         boolean construiu = this.tabuleiro.construirYurt(localizacao, this.jogadorAtual.getCor());
         if (construiu) {
+            this.podeSalvar = false;
             this.jogadorAtual.removerTributo(TipoTributo.YURT, 1);
             notificarObservadores();
             return true;
@@ -393,6 +400,7 @@ public class Partida implements ObservadoIF {
     public void coletarTributo(Cor cor, TipoTributo tipo, int quantidade) {
         Jogador j = this.jogadores.get(cor);
         if (j != null && tipo != null && quantidade > 0) {
+            this.podeSalvar = false;
             j.adicionarTributo(tipo, quantidade);
             notificarObservadores();
         }
@@ -418,6 +426,7 @@ public class Partida implements ObservadoIF {
 
         boolean sucesso = cidade.saquearTesouro(this.jogadorAtual.getCor());
         if (sucesso) {
+            this.podeSalvar = false;
             this.jogadorAtual.removerTributo(TipoTributo.ESPADA, 1);
             this.jogadorAtual.ganharVotos(1);
 
@@ -442,6 +451,7 @@ public class Partida implements ObservadoIF {
      */
     public void moverKhan(String destino) {
         if (destino != null) {
+            this.podeSalvar = false;
             this.tabuleiro.getPeaoDoKhan().mover(destino);
             notificarObservadores();
         }
@@ -583,6 +593,13 @@ public class Partida implements ObservadoIF {
                 if (a.getVotosKurultai() != b.getVotosKurultai()) {
                     return b.getVotosKurultai() - a.getVotosKurultai();
                 }
+                // Desempate 1 (Regra oficial): maior estoque de recursos/tributos acumulados
+                int recA = a.getQuantidadeTributo(TipoTributo.ESPADA) + a.getQuantidadeTributo(TipoTributo.YURT) + a.getQuantidadeTributo(TipoTributo.MOEDA);
+                int recB = b.getQuantidadeTributo(TipoTributo.ESPADA) + b.getQuantidadeTributo(TipoTributo.YURT) + b.getQuantidadeTributo(TipoTributo.MOEDA);
+                if (recA != recB) {
+                    return recB - recA;
+                }
+                // Desempate 2: maior número de descendentes
                 return b.getQuantidadeDescendentes() - a.getQuantidadeDescendentes();
             }
         });
@@ -645,33 +662,86 @@ public class Partida implements ObservadoIF {
         return ok;
     }
 
-    // --- Salvamento e recuperação da partida (serialização) ---
-
-    private static class Estado implements java.io.Serializable {
-        private static final long serialVersionUID = 1L;
-        Map<Cor, Jogador> jogadores;
-        List<Cor> ordemTurnos;
-        int indiceTurnoAtual;
-        Tabuleiro tabuleiro;
-        BaralhoDeCidades baralho;
-        Jogador jogadorAtual;
-        int movimentosRestantes;
-        boolean partidaEncerrada;
-    }
+    // --- Salvamento e recuperacao da partida em arquivo texto (.txt) ASCII puro ---
 
     public boolean salvar(String caminho) {
         if (caminho == null) return false;
-        Estado e = new Estado();
-        e.jogadores = new HashMap<Cor, Jogador>(jogadores);
-        e.ordemTurnos = new ArrayList<Cor>(ordemTurnos);
-        e.indiceTurnoAtual = indiceTurnoAtual;
-        e.tabuleiro = tabuleiro;
-        e.baralho = baralho;
-        e.jogadorAtual = jogadorAtual;
-        e.movimentosRestantes = movimentosRestantes;
-        e.partidaEncerrada = partidaEncerrada;
-        try (java.io.ObjectOutputStream out = new java.io.ObjectOutputStream(new java.io.FileOutputStream(caminho))) {
-            out.writeObject(e);
+        try (java.io.PrintWriter pw = new java.io.PrintWriter(
+                new java.io.OutputStreamWriter(new java.io.FileOutputStream(caminho), java.nio.charset.StandardCharsets.US_ASCII))) {
+
+            pw.println("[PARTIDA]");
+            pw.println("indiceTurnoAtual=" + indiceTurnoAtual);
+            pw.println("jogadorAtual=" + (jogadorAtual == null ? "null" : jogadorAtual.getCor().name()));
+            pw.println("movimentosRestantes=" + movimentosRestantes);
+            pw.println("partidaEncerrada=" + partidaEncerrada);
+            pw.println("podeSalvar=" + podeSalvar);
+            pw.println("khanLocal=" + (tabuleiro != null && tabuleiro.getPeaoDoKhan() != null ? tabuleiro.getPeaoDoKhan().getLocalizacaoAtual() : "Fora do Tabuleiro"));
+
+            pw.println("\n[ORDEM_TURNOS]");
+            StringBuilder sbOrdem = new StringBuilder();
+            for (int i = 0; i < ordemTurnos.size(); i++) {
+                if (i > 0) sbOrdem.append(",");
+                sbOrdem.append(ordemTurnos.get(i).name());
+            }
+            pw.println(sbOrdem.toString());
+
+            pw.println("\n[JOGADORES]");
+            for (Cor c : ordemTurnos) {
+                Jogador j = jogadores.get(c);
+                if (j == null) continue;
+                pw.println("---");
+                pw.println("cor=" + j.getCor().name());
+                pw.println("nome=" + j.getNome());
+                pw.println("herdeiro=" + (j.getHerdeiro() == null ? "" : j.getHerdeiro()));
+                pw.println("descendentes=" + j.getQuantidadeDescendentes());
+                pw.println("votos=" + j.getVotosKurultai());
+                pw.println("localizacao=" + (j.getMeuPeao() == null ? "Karakorum" : j.getMeuPeao().getLocalizacaoAtual()));
+                pw.println("espadas=" + j.getQuantidadeTributo(TipoTributo.ESPADA));
+                pw.println("yurts=" + j.getQuantidadeTributo(TipoTributo.YURT));
+                pw.println("moedas=" + j.getQuantidadeTributo(TipoTributo.MOEDA));
+                pw.println("conselheiro=" + (j.getConselheiro() == null ? "" : j.getConselheiro()));
+                pw.println("cartaSecreta=" + (j.getCartaSecreta() == null ? "" : j.getCartaSecreta()));
+                StringBuilder sbCartas = new StringBuilder();
+                List<String> cartas = j.getCartas();
+                for (int k = 0; k < cartas.size(); k++) {
+                    if (k > 0) sbCartas.append(",");
+                    sbCartas.append(cartas.get(k));
+                }
+                pw.println("cartas=" + sbCartas.toString());
+            }
+
+            pw.println("\n[YURTS]");
+            if (tabuleiro != null) {
+                Map<String, Cor> yurts = tabuleiro.getYurts();
+                for (Map.Entry<String, Cor> entry : yurts.entrySet()) {
+                    pw.println(entry.getKey() + "=" + entry.getValue().name());
+                }
+            }
+
+            pw.println("\n[CIDADES_TABULEIRO]");
+            if (tabuleiro != null) {
+                Map<NomeCidade, Cidade> cidades = tabuleiro.getCidadesDisponiveis();
+                for (Cidade cid : cidades.values()) {
+                    pw.println(cid.getNomeCidade().name() + ";" +
+                               cid.getQuantidadeTesouros() + ";" +
+                               cid.isConquistada() + ";" +
+                               (cid.getConquistador() == null ? "null" : cid.getConquistador().name()));
+                }
+            }
+
+            pw.println("\n[BARALHO_PILHA]");
+            if (baralho != null) {
+                StringBuilder sbBaralho = new StringBuilder();
+                java.util.Deque<Cidade> pilha = baralho.getPilha();
+                boolean primeiro = true;
+                for (Cidade cid : pilha) {
+                    if (!primeiro) sbBaralho.append(",");
+                    sbBaralho.append(cid.getNomeCidade().name());
+                    primeiro = false;
+                }
+                pw.println(sbBaralho.toString());
+            }
+
             return true;
         } catch (java.io.IOException ex) {
             return false;
@@ -680,22 +750,169 @@ public class Partida implements ObservadoIF {
 
     public boolean carregar(String caminho) {
         if (caminho == null) return false;
-        try (java.io.ObjectInputStream in = new java.io.ObjectInputStream(new java.io.FileInputStream(caminho))) {
-            Estado e = (Estado) in.readObject();
-            this.jogadores = e.jogadores;
-            this.ordemTurnos = e.ordemTurnos;
-            this.indiceTurnoAtual = e.indiceTurnoAtual;
-            this.tabuleiro = e.tabuleiro;
-            this.baralho = e.baralho;
-            this.jogadorAtual = e.jogadorAtual;
-            this.movimentosRestantes = e.movimentosRestantes;
-            this.partidaEncerrada = e.partidaEncerrada;
+        java.io.File f = new java.io.File(caminho);
+        if (!f.exists() || !f.isFile()) return false;
+
+        try (java.io.BufferedReader br = new java.io.BufferedReader(
+                new java.io.InputStreamReader(new java.io.FileInputStream(f), java.nio.charset.StandardCharsets.US_ASCII))) {
+
+            String secao = "";
+            String linha;
+            Map<String, String> dadosPartida = new HashMap<String, String>();
+            List<Cor> novaOrdemTurnos = new ArrayList<Cor>();
+            Map<Cor, Jogador> novosJogadores = new HashMap<Cor, Jogador>();
+            Map<String, Cor> novosYurts = new HashMap<String, Cor>();
+            Map<NomeCidade, Cidade> novasCidades = new HashMap<NomeCidade, Cidade>();
+            List<String> cartasBaralho = new ArrayList<String>();
+
+            Jogador jogadorTemp = null;
+
+            while ((linha = br.readLine()) != null) {
+                linha = linha.trim();
+                if (linha.isEmpty() || linha.startsWith("#")) continue;
+
+                if (linha.startsWith("[") && linha.endsWith("]")) {
+                    secao = linha.substring(1, linha.length() - 1);
+                    continue;
+                }
+
+                if ("PARTIDA".equals(secao)) {
+                    int eq = linha.indexOf('=');
+                    if (eq > 0) {
+                        dadosPartida.put(linha.substring(0, eq).trim(), linha.substring(eq + 1).trim());
+                    }
+                } else if ("ORDEM_TURNOS".equals(secao)) {
+                    String[] tokens = linha.split(",");
+                    for (String t : tokens) {
+                        t = t.trim();
+                        if (!t.isEmpty()) {
+                            novaOrdemTurnos.add(Cor.valueOf(t));
+                        }
+                    }
+                } else if ("JOGADORES".equals(secao)) {
+                    if (linha.equals("---")) {
+                        jogadorTemp = null;
+                        continue;
+                    }
+                    int eq = linha.indexOf('=');
+                    if (eq > 0) {
+                        String chave = linha.substring(0, eq).trim();
+                        String valor = linha.substring(eq + 1).trim();
+                        if ("cor".equals(chave)) {
+                            Cor cor = Cor.valueOf(valor);
+                            jogadorTemp = new Jogador("", cor, 0);
+                            novosJogadores.put(cor, jogadorTemp);
+                        } else if (jogadorTemp != null) {
+                            if ("nome".equals(chave)) {
+                                jogadorTemp.setNome(valor);
+                            } else if ("herdeiro".equals(chave)) {
+                                jogadorTemp.setHerdeiro(valor.isEmpty() ? null : valor);
+                            } else if ("descendentes".equals(chave)) {
+                                jogadorTemp.setQuantidadeDescendentes(Integer.parseInt(valor));
+                            } else if ("votos".equals(chave)) {
+                                jogadorTemp.setVotosKurultai(Integer.parseInt(valor));
+                            } else if ("localizacao".equals(chave)) {
+                                jogadorTemp.getMeuPeao().mover(valor);
+                            } else if ("espadas".equals(chave)) {
+                                jogadorTemp.definirTributoDireto(TipoTributo.ESPADA, Integer.parseInt(valor));
+                            } else if ("yurts".equals(chave)) {
+                                jogadorTemp.definirTributoDireto(TipoTributo.YURT, Integer.parseInt(valor));
+                            } else if ("moedas".equals(chave)) {
+                                jogadorTemp.definirTributoDireto(TipoTributo.MOEDA, Integer.parseInt(valor));
+                            } else if ("conselheiro".equals(chave)) {
+                                jogadorTemp.setConselheiro(valor.isEmpty() ? null : valor);
+                            } else if ("cartaSecreta".equals(chave)) {
+                                jogadorTemp.setCartaSecreta(valor.isEmpty() ? null : valor);
+                            } else if ("cartas".equals(chave)) {
+                                jogadorTemp.limparCartas();
+                                if (!valor.isEmpty()) {
+                                    String[] cartas = valor.split(",");
+                                    for (String c : cartas) {
+                                        if (!c.trim().isEmpty()) {
+                                            jogadorTemp.adicionarCarta(c.trim());
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else if ("YURTS".equals(secao)) {
+                    int eq = linha.indexOf('=');
+                    if (eq > 0) {
+                        String loc = linha.substring(0, eq).trim();
+                        Cor cor = Cor.valueOf(linha.substring(eq + 1).trim());
+                        novosYurts.put(loc, cor);
+                    }
+                } else if ("CIDADES_TABULEIRO".equals(secao)) {
+                    String[] partes = linha.split(";");
+                    if (partes.length >= 4) {
+                        NomeCidade nc = NomeCidade.valueOf(partes[0].trim());
+                        Regiao r = Cidade.regiaoDe(nc);
+                        Cidade c = new Cidade(nc, r);
+                        c.setQuantidadeTesouros(Integer.parseInt(partes[1].trim()));
+                        c.setConquistada(Boolean.parseBoolean(partes[2].trim()));
+                        String conq = partes[3].trim();
+                        if (!"null".equalsIgnoreCase(conq) && !conq.isEmpty()) {
+                            c.setConquistador(Cor.valueOf(conq));
+                        }
+                        novasCidades.put(nc, c);
+                    }
+                } else if ("BARALHO_PILHA".equals(secao)) {
+                    String[] tokens = linha.split(",");
+                    for (String t : tokens) {
+                        t = t.trim();
+                        if (!t.isEmpty()) {
+                            cartasBaralho.add(t);
+                        }
+                    }
+                }
+            }
+
+            // Aplicar estado restaurado
+            this.jogadores = novosJogadores;
+            this.ordemTurnos = novaOrdemTurnos;
+            this.indiceTurnoAtual = Integer.parseInt(dadosPartida.getOrDefault("indiceTurnoAtual", "0"));
+            this.movimentosRestantes = Integer.parseInt(dadosPartida.getOrDefault("movimentosRestantes", "0"));
+            this.partidaEncerrada = Boolean.parseBoolean(dadosPartida.getOrDefault("partidaEncerrada", "false"));
+            this.podeSalvar = Boolean.parseBoolean(dadosPartida.getOrDefault("podeSalvar", "true"));
+
+            String corAtualStr = dadosPartida.get("jogadorAtual");
+            if (corAtualStr != null && !"null".equalsIgnoreCase(corAtualStr)) {
+                this.jogadorAtual = this.jogadores.get(Cor.valueOf(corAtualStr));
+            } else if (!this.ordemTurnos.isEmpty()) {
+                this.jogadorAtual = this.jogadores.get(this.ordemTurnos.get(this.indiceTurnoAtual));
+            }
+
+            // Tabuleiro
+            this.tabuleiro = new Tabuleiro(new ArrayList<Cidade>(novasCidades.values()));
+            this.tabuleiro.limparYurts();
+            for (Map.Entry<String, Cor> entry : novosYurts.entrySet()) {
+                this.tabuleiro.construirYurt(entry.getKey(), entry.getValue());
+            }
+            String khanLoc = dadosPartida.getOrDefault("khanLocal", "Fora do Tabuleiro");
+            if (this.tabuleiro.getPeaoDoKhan() != null) {
+                this.tabuleiro.getPeaoDoKhan().mover(khanLoc);
+            }
+
+            // Baralho
+            this.baralho = new BaralhoDeCidades();
+            java.util.Deque<Cidade> novaPilha = new java.util.ArrayDeque<Cidade>();
+            for (String ncStr : cartasBaralho) {
+                try {
+                    NomeCidade nc = NomeCidade.valueOf(ncStr);
+                    novaPilha.addLast(new Cidade(nc, Cidade.regiaoDe(nc)));
+                } catch (IllegalArgumentException e) {}
+            }
+            this.baralho.setPilha(novaPilha);
+
             this.exibirCartela = false;
             this.exibirCartas = false;
             this.exibirInventario = false;
+
             notificarObservadores();
             return true;
-        } catch (java.io.IOException | ClassNotFoundException | ClassCastException ex) {
+        } catch (Exception ex) {
+            ex.printStackTrace();
             return false;
         }
     }

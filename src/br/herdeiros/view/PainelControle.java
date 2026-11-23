@@ -1,6 +1,9 @@
 package br.herdeiros.view;
 
 import br.herdeiros.controller.JogoController;
+import br.herdeiros.observer.IndicesEstado;
+import br.herdeiros.observer.ObservadoIF;
+import br.herdeiros.observer.ObservadorIF;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -22,11 +25,12 @@ import javax.swing.border.TitledBorder;
  * visual decorrente chega pelas Views observadoras (padrão Observer).
  * Nenhum botão movimenta peões: a movimentação é feita por clique no tabuleiro.
  */
-public class PainelControle extends JPanel {
+public class PainelControle extends JPanel implements ObservadorIF {
 
     private PainelStatusTurno painelStatus;
     private JComboBox<Integer> comboMovimentos;
     private JComboBox<String> comboTributo;
+    private JButton btnSalvar;
 
     public PainelControle(final PainelTabuleiro painelTabuleiro) {
         setPreferredSize(new Dimension(300, 1050));
@@ -83,7 +87,7 @@ public class PainelControle extends JPanel {
         add(btnVerInventario);
 
         // 2.2 Salvar partida e encerrar partida (apuração do vencedor)
-        JButton btnSalvar = criarBotao("Salvar Partida", new Color(41, 128, 185), 32, 12);
+        btnSalvar = criarBotao("Salvar Partida", new Color(41, 128, 185), 32, 12);
         btnSalvar.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -186,6 +190,15 @@ public class PainelControle extends JPanel {
         painelTestador.add(btnDefinirMovimentos);
         painelTestador.add(chkKhan);
         add(painelTestador);
+
+        JogoController.getInstance().registra(this);
+    }
+
+    @Override
+    public void notify(ObservadoIF o) {
+        if (btnSalvar != null) {
+            btnSalvar.setEnabled(o.get(IndicesEstado.PODE_SALVAR) == 1);
+        }
     }
 
     private JButton criarBotao(String texto, Color fundo, int altura, int tamanhoFonte) {

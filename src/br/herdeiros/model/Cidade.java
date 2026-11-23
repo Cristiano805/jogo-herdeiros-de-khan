@@ -19,6 +19,16 @@ class Cidade implements java.io.Serializable {
         this.conquistada = false;
         this.conquistador = null;
     }
+
+    public static Regiao regiaoDe(NomeCidade nome) {
+        if (nome == null) return Regiao.RUSSIA;
+        switch (nome) {
+            case MOSCOU: case KAZAN: case NOVGOROD: return Regiao.RUSSIA;
+            case PEQUIM: case CANTAO: case XIAN: return Regiao.CHINA;
+            case SAMARCANDA: case BAGDA: case TABRIZ: return Regiao.PERSIA;
+            default: return Regiao.RUSSIA;
+        }
+    }
     
     // Um Peão tentará saquear a cidade
     public boolean saquearTesouro() {
@@ -55,6 +65,18 @@ class Cidade implements java.io.Serializable {
 
     public int getQuantidadeTesouros() {
         return quantidadeTesouros;
+    }
+
+    public void setQuantidadeTesouros(int quantidade) {
+        this.quantidadeTesouros = Math.max(0, quantidade);
+    }
+
+    public void setConquistada(boolean conquistada) {
+        this.conquistada = conquistada;
+    }
+
+    public void setConquistador(Cor conquistador) {
+        this.conquistador = conquistador;
     }
 
     public boolean isConquistada() {

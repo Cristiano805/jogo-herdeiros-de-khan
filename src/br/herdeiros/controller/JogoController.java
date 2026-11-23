@@ -10,6 +10,7 @@ import java.io.File;
 import java.util.List;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
  * Controlador da aplicação (Controller do MVC) - Singleton.
@@ -25,7 +26,7 @@ import javax.swing.JOptionPane;
  */
 public class JogoController {
 
-    private static final String ARQUIVO_PADRAO = "herdeiros_save.dat";
+    private static final String ARQUIVO_PADRAO = "herdeiros_save.txt";
 
     private static JogoController instancia;
 
@@ -79,7 +80,8 @@ public class JogoController {
             @Override
             public void aoContinuarJogoSalvo() {
                 JFileChooser chooser = new JFileChooser(new File("."));
-                chooser.setDialogTitle("Carregar partida salva");
+                chooser.setDialogTitle("Carregar partida salva (.txt)");
+                chooser.setFileFilter(new FileNameExtensionFilter("Arquivo de Texto (*.txt)", "txt"));
                 chooser.setSelectedFile(new File(ARQUIVO_PADRAO));
                 if (chooser.showOpenDialog(refMenu[0]) != JFileChooser.APPROVE_OPTION) {
                     return;
@@ -222,17 +224,23 @@ public class JogoController {
     // Salvamento e fim de partida
     // ------------------------------------------------------------------
 
-    /** Pergunta o arquivo e salva a partida atual. */
+    /** Pergunta o arquivo e salva a partida atual em arquivo texto (.txt). */
     public void salvarPartida() {
         JFileChooser chooser = new JFileChooser(new File("."));
-        chooser.setDialogTitle("Salvar partida");
+        chooser.setDialogTitle("Salvar partida (.txt)");
+        chooser.setFileFilter(new FileNameExtensionFilter("Arquivo de Texto (*.txt)", "txt"));
         chooser.setSelectedFile(new File(ARQUIVO_PADRAO));
         if (chooser.showSaveDialog(janelaPrincipal) != JFileChooser.APPROVE_OPTION) {
             return;
         }
-        boolean ok = model().salvar(chooser.getSelectedFile().getAbsolutePath());
+        File f = chooser.getSelectedFile();
+        String caminho = f.getAbsolutePath();
+        if (!caminho.toLowerCase().endsWith(".txt")) {
+            caminho += ".txt";
+        }
+        boolean ok = model().salvar(caminho);
         JOptionPane.showMessageDialog(janelaPrincipal,
-                ok ? "Partida salva com sucesso." : "Erro ao salvar a partida.",
+                ok ? "Partida salva com sucesso em arquivo texto (.txt)." : "Erro ao salvar a partida.",
                 "Salvar Partida",
                 ok ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.ERROR_MESSAGE);
     }
@@ -247,6 +255,22 @@ public class JogoController {
         if (model().isPartidaEncerrada()) {
             JOptionPane.showMessageDialog(janelaPrincipal, model().getResumoFinal(),
                     "Fim da partida - Herdeiros de Khan", JOptionPane.INFORMATION_MESSAGE);
+
+            int opcao = JOptionPane.showConfirmDialog(janelaPrincipal,
+                    "Desejam iniciar uma nova partida?",
+                    "Nova Partida",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE);
+
+            if (opcao == JOptionPane.YES_OPTION) {
+                if (janelaPrincipal != null) {
+                    janelaPrincipal.dispose();
+                    janelaPrincipal = null;
+                }
+                abrirEscolhaPersonagens();
+            } else {
+                System.exit(0);
+            }
         }
     }
 

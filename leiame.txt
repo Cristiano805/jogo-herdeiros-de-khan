@@ -13,4 +13,8 @@ COMPONENTES DO GRUPO:
 ----------------------------------------------------------------------
 CLASSE QUE CONTÉM O MÉTODO MAIN:
 br.herdeiros.Main
+
+----------------------------------------------------------------------
+LINK DO VÍDEO DE APRESENTAÇÃO (Google Drive ou Dropbox):
+[COLE_AQUI_O_LINK_DO_VIDEO]
 ======================================================================

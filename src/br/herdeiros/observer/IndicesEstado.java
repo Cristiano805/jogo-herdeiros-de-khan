@@ -47,6 +47,7 @@ public final class IndicesEstado {
     public static final int EXIBIR_INVENTARIO = 5;     // 1 = janela de inventário deve estar visível
     public static final int LOCALIDADE_KHAN = 6;
     public static final int PARTIDA_ENCERRADA = 7;     // 1 = partida terminou
+    public static final int PODE_SALVAR = 8;            // 1 = antes do jogador agir (salvamento habilitado)
 
     // --- Estado por jogador: JOGADOR_BASE + j * JOGADOR_PASSO + campo ---
     public static final int JOGADOR_BASE = 100;

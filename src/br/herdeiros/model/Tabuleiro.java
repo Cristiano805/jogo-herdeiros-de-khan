@@ -278,6 +278,21 @@ class Tabuleiro implements java.io.Serializable {
         }
     }
 
+    public Map<String, Cor> getYurts() {
+        return Collections.unmodifiableMap(yurts);
+    }
+
+    public void limparYurts() {
+        this.yurts.clear();
+    }
+
+    public void recriarCidadesDisponiveis(Map<NomeCidade, Cidade> novas) {
+        this.cidadesDisponiveis.clear();
+        if (novas != null) {
+            this.cidadesDisponiveis.putAll(novas);
+        }
+    }
+
     public Cidade getCidade(NomeCidade nome) {
         return this.cidadesDisponiveis.get(nome);
     }
